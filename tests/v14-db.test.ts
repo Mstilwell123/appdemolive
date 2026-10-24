@@ -94,3 +94,36 @@ describe("R4 recordings", () => {
     await expect(asUser(db, alice.userId, () => db.query("update public.launch_recordings set status='ready' where launch_id=$1", [launchId]))).rejects.toThrow();
   });
 });
+
+describe("R5 content pack", () => {
+  async function clip(launchId: string, orgId = alice.orgId) {
+    const c = await db.query<{ id: string }>("insert into public.launch_clips (organization_id, launch_id, position) values ($1,$2,1) returning id", [orgId, launchId]);
+    const v = await db.query<{ id: string }>("insert into public.launch_clip_versions (clip_id, launch_id, organization_id, version, content) values ($1,$2,$3,1,'{}') returning id", [c.rows[0].id, launchId, orgId]);
+    return { clipId: c.rows[0].id, versionId: v.rows[0].id };
+  }
+  it("enforces export and review rules", async () => {
+    const { launchId } = await seedAppAndLaunch(db, alice.orgId, alice.userId, "pack-rules");
+    const { clipId, versionId } = await clip(launchId);
+    await expect(db.query("update public.launch_clip_versions set export_status='ready' where id=$1", [versionId])).rejects.toThrow();
+    await expect(db.query("update public.launch_clip_versions set export_status='failed' where id=$1", [versionId])).rejects.toThrow();
+    await expect(db.query("insert into public.launch_clip_versions (clip_id, launch_id, organization_id, version, content) values ($1,$2,$3,1,'{}')", [clipId, launchId, alice.orgId])).rejects.toThrow();
+    await expect(db.query("insert into public.launch_clip_reviews (version_id, launch_id, organization_id, stage, decision) values ($1,$2,$3,'founder','rejected')", [versionId, launchId, alice.orgId])).rejects.toThrow();
+    await db.query("insert into public.launch_clip_reviews (version_id, launch_id, organization_id, stage, decision) values ($1,$2,$3,'internal','approved')", [versionId, launchId, alice.orgId]);
+  });
+  it("can't attach a version or review to another launch", async () => {
+    const a = await seedAppAndLaunch(db, alice.orgId, alice.userId, "pack-a");
+    const b = await seedAppAndLaunch(db, alice.orgId, alice.userId, "pack-b");
+    const { clipId, versionId } = await clip(a.launchId);
+    await expect(db.query("insert into public.launch_clip_versions (clip_id, launch_id, organization_id, version, content) values ($1,$2,$3,2,'{}')", [clipId, b.launchId, alice.orgId])).rejects.toThrow();
+    await expect(db.query("insert into public.launch_clip_reviews (version_id, launch_id, organization_id, stage, decision) values ($1,$2,$3,'internal','approved')", [versionId, b.launchId, alice.orgId])).rejects.toThrow();
+  });
+  it("is private to the org and read-only for clients", async () => {
+    const { launchId } = await seedAppAndLaunch(db, alice.orgId, alice.userId, "pack-rls");
+    const { versionId } = await clip(launchId);
+    for (const t of ["launch_clips", "launch_clip_versions"]) {
+      expect((await asUser(db, alice.userId, () => db.query(`select id from public.${t} where launch_id=$1`, [launchId]))).rows).toHaveLength(1);
+      expect((await asUser(db, bob.userId, () => db.query(`select id from public.${t} where launch_id=$1`, [launchId]))).rows).toHaveLength(0);
+    }
+    await expect(asUser(db, alice.userId, () => db.query("insert into public.launch_clip_reviews (version_id, launch_id, organization_id, stage, decision) values ($1,$2,$3,'founder','approved')", [versionId, launchId, alice.orgId]))).rejects.toThrow();
+  });
+});
