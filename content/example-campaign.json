@@ -1,0 +1,362 @@
+{
+  "assumptions": {
+    "A1": "The example app is the existing fictional InvoicePilot sample.",
+    "A2": "All footage and clips are rendered illustrations, labeled Illustrative example, not real customer work.",
+    "A3": "All results shown are labeled Example data and are not measured outcomes.",
+    "A4": "The 14-day plan and two revision rounds are product behavior, not package terms."
+  },
+  "appName": "InvoicePilot",
+  "sampleId": "invoicepilot",
+  "primaryAction": "Create your first invoice schedule",
+  "source": {
+    "title": "Founder demo: InvoicePilot in 36 seconds",
+    "scenes": [
+      {
+        "title": "Late payments cost freelancers time",
+        "body": "Freelancers billing $5k-$30k a month chase invoices by hand.",
+        "caption": "Freelancers lose money and time to late payments and awkward follow-up emails.",
+        "seconds": 6
+      },
+      {
+        "title": "Step 1 · Upload the signed proposal",
+        "body": "Drop in the signed PDF. InvoicePilot reads the payment schedule.",
+        "caption": "First, I upload the signed proposal. InvoicePilot reads the agreed payment schedule.",
+        "seconds": 6
+      },
+      {
+        "title": "Step 2 · Invoices on the agreed schedule",
+        "body": "3 invoices created: 40% deposit, 30% at midpoint, 30% on delivery.",
+        "caption": "It creates the invoices on the schedule from the proposal: deposit, midpoint and delivery.",
+        "seconds": 6
+      },
+      {
+        "title": "Step 3 · Polite reminders until paid",
+        "body": "Reminder 1 at due date, then +3 and +7 days. Stops when paid.",
+        "caption": "Polite reminders go out until the client pays, and they stop as soon as payment lands.",
+        "seconds": 6
+      },
+      {
+        "title": "Connects to Stripe and QuickBooks",
+        "body": "Payments reconcile automatically. No double entry.",
+        "caption": "It connects to Stripe and QuickBooks, so payments reconcile without double entry.",
+        "seconds": 6
+      },
+      {
+        "title": "$19 per month, cancel anytime",
+        "body": "Create your first invoice schedule.",
+        "caption": "It's 19 dollars a month, cancel anytime. Create your first invoice schedule.",
+        "seconds": 6
+      }
+    ]
+  },
+  "clips": [
+    {
+      "id": "hook",
+      "kind": "Hook",
+      "hook": "Stop chasing clients for money.",
+      "job": "The first seconds that stop the right freelancer scrolling.",
+      "durationSeconds": 8,
+      "scenes": [
+        {
+          "title": "Hook",
+          "body": "Stop chasing clients for money.",
+          "caption": "Stop chasing clients for money.",
+          "seconds": 4
+        },
+        {
+          "title": "InvoicePilot",
+          "body": "Create your first invoice schedule.",
+          "caption": "Create your first invoice schedule. Link in the post.",
+          "seconds": 4
+        }
+      ]
+    },
+    {
+      "id": "problem",
+      "kind": "Problem",
+      "hook": "Awkward follow-up emails? Late payments?",
+      "job": "Names the pain in the customer's words.",
+      "durationSeconds": 8,
+      "scenes": [
+        {
+          "title": "Problem",
+          "body": "Awkward follow-up emails? Late payments?",
+          "caption": "Awkward follow-up emails? Late payments?",
+          "seconds": 4
+        },
+        {
+          "title": "InvoicePilot",
+          "body": "Create your first invoice schedule.",
+          "caption": "Create your first invoice schedule. Link in the post.",
+          "seconds": 4
+        }
+      ]
+    },
+    {
+      "id": "demo",
+      "kind": "Demonstration",
+      "hook": "Proposal in, invoice schedule out.",
+      "job": "Shows the app doing the job start to finish.",
+      "durationSeconds": 8,
+      "scenes": [
+        {
+          "title": "Demonstration",
+          "body": "Proposal in, invoice schedule out.",
+          "caption": "Proposal in, invoice schedule out.",
+          "seconds": 4
+        },
+        {
+          "title": "InvoicePilot",
+          "body": "Create your first invoice schedule.",
+          "caption": "Create your first invoice schedule. Link in the post.",
+          "seconds": 4
+        }
+      ]
+    },
+    {
+      "id": "feature",
+      "kind": "Key feature",
+      "hook": "Reminders that stop when you're paid.",
+      "job": "The one capability that sets it apart.",
+      "durationSeconds": 8,
+      "scenes": [
+        {
+          "title": "Key feature",
+          "body": "Reminders that stop when you're paid.",
+          "caption": "Reminders that stop when you're paid.",
+          "seconds": 4
+        },
+        {
+          "title": "InvoicePilot",
+          "body": "Create your first invoice schedule.",
+          "caption": "Create your first invoice schedule. Link in the post.",
+          "seconds": 4
+        }
+      ]
+    },
+    {
+      "id": "usecase",
+      "kind": "Use case",
+      "hook": "A designer billing $12k/month, paid on schedule.",
+      "job": "A specific customer getting a specific result.",
+      "durationSeconds": 8,
+      "scenes": [
+        {
+          "title": "Use case",
+          "body": "A designer billing $12k/month, paid on schedule.",
+          "caption": "A designer billing $12k/month, paid on schedule.",
+          "seconds": 4
+        },
+        {
+          "title": "InvoicePilot",
+          "body": "Create your first invoice schedule.",
+          "caption": "Create your first invoice schedule. Link in the post.",
+          "seconds": 4
+        }
+      ]
+    },
+    {
+      "id": "objection",
+      "kind": "Objection",
+      "hook": "Will reminders annoy my clients?",
+      "job": "Answers the doubt buyers have.",
+      "durationSeconds": 8,
+      "scenes": [
+        {
+          "title": "Objection",
+          "body": "Will reminders annoy my clients?",
+          "caption": "Will reminders annoy my clients?",
+          "seconds": 4
+        },
+        {
+          "title": "InvoicePilot",
+          "body": "Create your first invoice schedule.",
+          "caption": "Create your first invoice schedule. Link in the post.",
+          "seconds": 4
+        }
+      ]
+    },
+    {
+      "id": "story",
+      "kind": "Founder story",
+      "hook": "Why the founder built InvoicePilot.",
+      "job": "Builds trust in who is behind it.",
+      "durationSeconds": 8,
+      "scenes": [
+        {
+          "title": "Founder story",
+          "body": "Why the founder built InvoicePilot.",
+          "caption": "Why the founder built InvoicePilot.",
+          "seconds": 4
+        },
+        {
+          "title": "InvoicePilot",
+          "body": "Create your first invoice schedule.",
+          "caption": "Create your first invoice schedule. Link in the post.",
+          "seconds": 4
+        }
+      ]
+    },
+    {
+      "id": "cta",
+      "kind": "Outcome and CTA",
+      "hook": "Get paid on time. $19/month, cancel anytime.",
+      "job": "Says exactly what to do next.",
+      "durationSeconds": 8,
+      "scenes": [
+        {
+          "title": "Outcome and CTA",
+          "body": "Get paid on time. $19/month, cancel anytime.",
+          "caption": "Get paid on time. $19/month, cancel anytime.",
+          "seconds": 4
+        },
+        {
+          "title": "InvoicePilot",
+          "body": "Create your first invoice schedule.",
+          "caption": "Create your first invoice schedule. Link in the post.",
+          "seconds": 4
+        }
+      ]
+    }
+  ],
+  "posts": [
+    {
+      "clip": "hook",
+      "channel": "LinkedIn",
+      "copy": "Freelancers: how many hours did you spend chasing invoices last month? InvoicePilot reads your signed proposal, creates the invoices on schedule and sends polite reminders until you're paid. Create your first invoice schedule: {link}"
+    },
+    {
+      "clip": "demo",
+      "channel": "X",
+      "copy": "Signed proposal in. Invoice schedule out. Reminders stop the moment the client pays. $19/mo, cancel anytime. {link}"
+    },
+    {
+      "clip": "objection",
+      "channel": "Instagram Reels",
+      "copy": "\"Won't reminders annoy my clients?\" They're polite, spaced out, and stop as soon as payment lands. See how: {link}"
+    }
+  ],
+  "plan": [
+    {
+      "day": 1,
+      "action": "Post",
+      "clip": "hook",
+      "channel": "LinkedIn"
+    },
+    {
+      "day": 2,
+      "action": "Post",
+      "clip": "demo",
+      "channel": "X"
+    },
+    {
+      "day": 3,
+      "action": "Post",
+      "clip": "problem",
+      "channel": "Instagram Reels"
+    },
+    {
+      "day": 4,
+      "action": "Review",
+      "note": "Check tracked clicks by clip and channel; reply to comments."
+    },
+    {
+      "day": 5,
+      "action": "Post",
+      "clip": "feature",
+      "channel": "LinkedIn"
+    },
+    {
+      "day": 6,
+      "action": "Post",
+      "clip": "usecase",
+      "channel": "X"
+    },
+    {
+      "day": 7,
+      "action": "Review",
+      "note": "Mid-point check: compare clicks per post. Do not change the plan on fewer than 30 clicks."
+    },
+    {
+      "day": 8,
+      "action": "Post",
+      "clip": "objection",
+      "channel": "Instagram Reels"
+    },
+    {
+      "day": 9,
+      "action": "Post",
+      "clip": "story",
+      "channel": "LinkedIn"
+    },
+    {
+      "day": 10,
+      "action": "Review",
+      "note": "Check tracked clicks by clip and channel; reply to comments."
+    },
+    {
+      "day": 11,
+      "action": "Post",
+      "clip": "cta",
+      "channel": "X"
+    },
+    {
+      "day": 12,
+      "action": "Post",
+      "clip": "demo",
+      "channel": "LinkedIn"
+    },
+    {
+      "day": 13,
+      "action": "Rest",
+      "note": "No post. Reply to comments and DMs yourself."
+    },
+    {
+      "day": 14,
+      "action": "Post",
+      "clip": "cta",
+      "channel": "Instagram Reels"
+    }
+  ],
+  "results": {
+    "label": "Example data",
+    "period": "Illustrative 14-day window",
+    "source": "Not measured. Numbers are made up to show the report layout.",
+    "rows": [
+      {
+        "clip": "hook",
+        "channel": "LinkedIn",
+        "clicks": 64,
+        "actions": 7
+      },
+      {
+        "clip": "demo",
+        "channel": "X",
+        "clicks": 41,
+        "actions": 5
+      },
+      {
+        "clip": "objection",
+        "channel": "Instagram Reels",
+        "clicks": 38,
+        "actions": 6
+      },
+      {
+        "clip": "cta",
+        "channel": "X",
+        "clicks": 22,
+        "actions": 1
+      }
+    ],
+    "unavailable": [
+      "Instagram Reels views (source not connected)"
+    ]
+  },
+  "experiment": {
+    "hypothesis": "Leading with the objection (\"Will reminders annoy my clients?\") gets more invoice schedules created per click than leading with the hook.",
+    "change": "Swap the day-1 LinkedIn post to the Objection clip; keep copy, link and time the same.",
+    "metric": "Invoice schedules created per tracked click",
+    "minimumSample": "At least 100 tracked clicks per variant before choosing a winner",
+    "why": "In the example data the Objection clip had the highest actions per click (6 of 38), but the sample is too small to call a winner."
+  }
+}
