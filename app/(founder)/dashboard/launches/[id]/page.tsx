@@ -4,7 +4,7 @@ import { LaunchPlan } from "@/components/launch-plan";
 import { SetupNotice } from "@/components/setup-notice";
 import { ErrorBanner, LaunchStatusBadge, LoadError, Panel, TextArea, TextField, buttonClass, inputClass, money, secondaryButtonClass, when } from "@/components/ui";
 import { stageInfo } from "@/domain/launch-stages";
-import { isSupabaseConfigured } from "@/lib/env";
+import { isDatabaseConfigured } from "@/lib/env";
 import { load } from "@/lib/page-load";
 import { GOAL_LABELS, GOAL_TYPES } from "@/schemas/launch";
 import { getLaunchDetail } from "@/services/launch-setup";
@@ -26,7 +26,7 @@ const FOUNDER_CANCELLABLE: LaunchStatus[] = ["DRAFT", "INTAKE_IN_PROGRESS", "SUB
 const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? v[0] ?? null : v);
 
 export default async function LaunchPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string; saved?: string }> }) {
-  if (!isSupabaseConfigured()) return <SetupNotice />;
+  if (!isDatabaseConfigured()) return <SetupNotice />;
   const { id } = await params;
   const { error, saved } = await searchParams;
   const data = await load(`/dashboard/launches/${id}`, async () => ({ d: await getLaunchDetail(id), next: await getLaunchNextAction(id), plan: await getLaunchPlan(id) }));

@@ -1,6 +1,7 @@
-import { createClient } from "@supabase/supabase-js";
+import { eq } from "drizzle-orm";
+import { launch_prices } from "@/db/schema";
 import { DEFAULT_LAUNCH_PRICES } from "@/integrations/billing/mock";
-import { env, isSupabaseConfigured } from "@/lib/env";
+import { getDb } from "@/lib/db";
 import type { PreviewPrice } from "@/domain/checkout-preview";
 import type { LaunchType } from "@/types/launch";
 import { CheckoutPreview } from "./checkout-preview";
@@ -8,13 +9,16 @@ import { CheckoutPreview } from "./checkout-preview";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Checkout preview | AppDemo.live", robots: { index: false, follow: false } };
 
-/** Prices come from the live launch_prices table (public read), so the preview shows the same saved price a launch snapshots. */
+/** Prices come from the live launch_prices table , so the preview shows the same saved price a launch snapshots. */
 async function loadPrices(): Promise<{ prices: PreviewPrice[]; source: "database" | "defaults" }> {
-  if (!isSupabaseConfigured()) return { prices: DEFAULT_LAUNCH_PRICES, source: "defaults" };
+  const db = getDb();
+  if (!db) return { prices: DEFAULT_LAUNCH_PRICES, source: "defaults" };
   try {
-    const sb = createClient(env.supabaseUrl, env.supabaseAnonKey, { auth: { persistSession: false, autoRefreshToken: false } });
-    const { data, error } = await sb.from("launch_prices").select("launch_type, amount, currency").eq("active", true);
-    if (error || !data?.length) return { prices: DEFAULT_LAUNCH_PRICES, source: "defaults" };
+    const data = await db
+      .select({ launch_type: launch_prices.launch_type, amount: launch_prices.amount, currency: launch_prices.currency })
+      .from(launch_prices)
+      .where(eq(launch_prices.active, true));
+    if (!data.length) return { prices: DEFAULT_LAUNCH_PRICES, source: "defaults" };
     const labels = Object.fromEntries(DEFAULT_LAUNCH_PRICES.map((p) => [p.launchType, p.label]));
     const prices = data
       .map((r) => ({ launchType: r.launch_type as LaunchType, amount: r.amount, currency: r.currency, label: labels[r.launch_type] ?? r.launch_type }))

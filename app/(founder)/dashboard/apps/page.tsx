@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { SetupNotice } from "@/components/setup-notice";
 import { Empty, LoadError } from "@/components/ui";
-import { isSupabaseConfigured } from "@/lib/env";
+import { isDatabaseConfigured } from "@/lib/env";
 import { load } from "@/lib/page-load";
 import { listApps } from "@/services/apps";
 
 export const dynamic = "force-dynamic";
 
 export default async function AppsPage() {
-  if (!isSupabaseConfigured()) return <SetupNotice />;
+  if (!isDatabaseConfigured()) return <SetupNotice />;
   const apps = await load("/dashboard/apps", listApps);
   if (!apps) return <LoadError what="your apps" />;
   return (
