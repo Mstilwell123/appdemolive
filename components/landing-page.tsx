@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { TabletMockup } from "@/components/tablet-mockup";
 import { DemoWalkthrough } from "@/components/demo-walkthrough";
-import { ExampleCampaign, ExampleVideo, IllustrativeBadge } from "@/components/example-campaign";
+import { ExampleCampaign, IllustrativeBadge } from "@/components/example-campaign";
 import { DEFAULT_LAUNCH_PRICES } from "@/integrations/billing/mock";
 
 /** Canonical public experience (PRD v1.4 §117): "/" is the example campaign; "/demo" renders the same page. */
@@ -52,8 +53,8 @@ export function LandingPage() {
             </div>
           </div>
           <div>
-            <ExampleVideo src="source-demo" label="InvoicePilot example demo, illustrative, with captions" />
-            <p className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500"><IllustrativeBadge /> InvoicePilot is a fictional sample app. Sound is off until you choose to play.</p>
+            <TabletMockup />
+            <p className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500"><IllustrativeBadge /> InvoicePilot is a fictional sample app. The screen shows the real example campaign below.</p>
           </div>
         </section>
 
