@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { LaunchStepsNav } from "@/components/launch-steps-nav";
+import { AVAILABLE_STEPS } from "@/lib/launch-steps";
 import { CheckoutButton } from "@/components/checkout-button";
 import { LaunchPlan } from "@/components/launch-plan";
 import { SetupNotice } from "@/components/setup-notice";
@@ -43,6 +45,7 @@ export default async function LaunchPage({ params, searchParams }: { params: Pro
 
   return (
     <div className="space-y-6">
+      <LaunchStepsNav launchId={id} available={AVAILABLE_STEPS} />
       <div>
         <Link href="/dashboard/launches" className="text-sm text-slate-500 hover:text-slate-800">Launches</Link>
         <h1 className="flex items-center gap-3 text-3xl font-bold">{app?.name} launch <LaunchStatusBadge status={status} /></h1>
