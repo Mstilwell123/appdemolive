@@ -79,3 +79,39 @@ describe("R4 recordings", () => {
     await expect(db.query("insert into public.launch_capture_plans (launch_id, organization_id) values ($1,$2)", [launchId, bob.orgId])).rejects.toThrow();
   });
 });
+
+describe("R5 content pack", () => {
+  const clip = async (orgId: string, launchId: string, pos = 1) =>
+    (await db.query<{ id: string }>("insert into public.launch_clips (organization_id, launch_id, position) values ($1,$2,$3) returning id", [orgId, launchId, pos])).rows[0].id;
+  const ver = (clipId: string, launchId: string, orgId: string, status = "not_started", path: string | null = null, n = 1) =>
+    db.query<{ id: string }>("insert into public.launch_clip_versions (clip_id, launch_id, organization_id, version, content, export_status, export_path) values ($1,$2,$3,$4,'{}'::jsonb,$5,$6) returning id",
+      [clipId, launchId, orgId, n, status, path]);
+  const review = (versionId: string, launchId: string, orgId: string, decision: string, reason: string | null) =>
+    db.query<{ id: string }>("insert into public.launch_clip_reviews (version_id, launch_id, organization_id, stage, decision, reason) values ($1,$2,$3,'internal',$4,$5) returning id",
+      [versionId, launchId, orgId, decision, reason]);
+  it("a ready export needs a file; versions are unique per clip", async () => {
+    const { launchId } = await seedAppAndLaunch(db, alice.orgId, alice.userId, "cp-ready");
+    const c = await clip(alice.orgId, launchId);
+    await expect(ver(c, launchId, alice.orgId, "ready", null)).rejects.toThrow();
+    await ver(c, launchId, alice.orgId, "ready", "a/b/e.mp4");
+    await expect(ver(c, launchId, alice.orgId)).rejects.toThrow();
+  });
+  it("revisions and rejections need a reason, and reviews can't be edited", async () => {
+    const { launchId } = await seedAppAndLaunch(db, alice.orgId, alice.userId, "cp-rev");
+    const v = (await ver(await clip(alice.orgId, launchId), launchId, alice.orgId)).rows[0].id;
+    await expect(review(v, launchId, alice.orgId, "rejected", " ")).rejects.toThrow();
+    const r = (await review(v, launchId, alice.orgId, "approved", null)).rows[0].id;
+    await expect(db.query("update public.launch_clip_reviews set decision = 'rejected', reason = 'x' where id = $1", [r])).rejects.toThrow(/append-only/);
+  });
+  it("rejects clips, versions and reviews tied to another org or launch", async () => {
+    const { launchId } = await seedAppAndLaunch(db, alice.orgId, alice.userId, "cp-x");
+    const { launchId: other } = await seedAppAndLaunch(db, alice.orgId, alice.userId, "cp-x2");
+    await expect(clip(bob.orgId, launchId)).rejects.toThrow();
+    const c = await clip(alice.orgId, launchId);
+    await expect(ver(c, other, alice.orgId)).rejects.toThrow();
+    await expect(ver(c, launchId, bob.orgId)).rejects.toThrow();
+    const v = (await ver(c, launchId, alice.orgId)).rows[0].id;
+    await expect(review(v, other, alice.orgId, "approved", null)).rejects.toThrow();
+    await expect(review(v, launchId, bob.orgId, "approved", null)).rejects.toThrow();
+  });
+});

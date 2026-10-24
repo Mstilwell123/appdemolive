@@ -128,3 +128,76 @@ describe("R4 recording service", () => {
     storage.setStorageForTests(undefined);
   });
 });
+
+describe("R5 content pack service", () => {
+  it("operator proposes, exports and reviews first; founder approves; other orgs see nothing", async () => {
+    const { mkdtempSync, writeFileSync, mkdirSync } = await import("node:fs");
+    const { tmpdir } = await import("node:os");
+    const { join, dirname } = await import("node:path");
+    process.env.LOCAL_STORAGE_DIR = mkdtempSync(join(tmpdir(), "appdemo-cp-"));
+    const storage = await import("@/integrations/storage");
+    storage.setStorageForTests(storage.localStorageAdapter);
+    const cp = await import("@/services/content-pack");
+    const files = await import("@/services/content-pack-files");
+    const { launchId } = await seedAppAndLaunch(pg, alice.orgId, alice.userId, "svc-cp");
+    const transcript = JSON.stringify([
+      { startMs: 0, endMs: 6000, text: "The problem is invoicing wastes hours every week." },
+      { startMs: 6000, endMs: 12000, text: "Let me show you the dashboard." },
+      { startMs: 12000, endMs: 20000, text: "Sign up free at the link below." },
+    ]);
+    await pg.query("insert into public.launch_recordings (organization_id, launch_id, source, status, storage_path, transcript) values ($1,$2,'upload','ready','x/y/rec.webm',$3::jsonb)",
+      [alice.orgId, launchId, transcript]);
+
+    signIn(staff);
+    await expect(cp.proposeContentPack(launchId)).rejects.toMatchObject({ code: "APPROVAL_REQUIRED" });
+    await pg.query("insert into public.launch_truth_sheets (organization_id, launch_id, version, status, items, approved_by, approved_at) values ($1,$2,1,'approved','[]'::jsonb,$3,now())",
+      [alice.orgId, launchId, alice.userId]);
+    signIn(alice);
+    await expect(cp.proposeContentPack(launchId)).rejects.toMatchObject({ code: "FORBIDDEN" });
+    signIn(staff);
+    expect(await cp.proposeContentPack(launchId)).toBeGreaterThan(0);
+    await expect(cp.proposeContentPack(launchId)).rejects.toMatchObject({ code: "INVALID_STATE_TRANSITION" });
+
+    signIn(bob);
+    await expect(cp.getContentPack(launchId)).rejects.toMatchObject(NF);
+    await expect(files.getTranscriptVtt(launchId)).rejects.toMatchObject(NF);
+    signIn(alice);
+    expect(await files.getTranscriptVtt(launchId)).toMatch(/^WEBVTT/);
+    const pack = await cp.getContentPack(launchId);
+    const c = pack.clips[0];
+    expect(pack.recording?.url).toMatch(/op=get/);
+
+    await expect(cp.reviewClip(launchId, c.current.id, "approved", "")).rejects.toMatchObject({ code: "VALIDATION_FAILED" });
+    signIn(bob);
+    await expect(cp.reviewClip(launchId, c.current.id, "approved", "")).rejects.toMatchObject(NF);
+    await expect(cp.editClip(launchId, c.id, c.current.content)).rejects.toMatchObject(NF);
+
+    signIn(staff);
+    const file = { name: "cut.mp4", type: "video/mp4", size: 5 };
+    const begun = await cp.beginExportUpload(launchId, c.current.id, file);
+    await expect(cp.completeExportUpload(launchId, c.current.id)).rejects.toMatchObject({ code: "PROCESSING_FAILED" });
+    const again = await cp.beginExportUpload(launchId, c.current.id, file);
+    expect(again.upload.url).not.toBe(begun.upload.url);
+    const key = new URL(again.upload.url, "http://x").searchParams.get("key")!;
+    expect(key.startsWith(`${alice.orgId}/${launchId}/exports/`)).toBe(true);
+    mkdirSync(dirname(join(storage.storageRoot(), key)), { recursive: true });
+    writeFileSync(join(storage.storageRoot(), key), "video");
+    await cp.completeExportUpload(launchId, c.current.id);
+    await cp.reviewClip(launchId, c.current.id, "approved", "");
+
+    signIn(alice);
+    await cp.reviewClip(launchId, c.current.id, "approved", "");
+    expect((await cp.getContentPack(launchId)).clips[0].exportUrl).toMatch(/op=get/);
+    const { getDb } = await import("@/lib/db");
+    expect((await cp.approvedClipVersions(getDb()!, launchId)).map((a) => a.clipId)).toEqual([c.id]);
+
+    // Copy-only edit keeps the export but needs fresh reviews.
+    await cp.editClip(launchId, c.id, { ...c.current.content, caption: "New caption", cta: c.current.content.cta || "Start free" });
+    const edited = (await cp.getContentPack(launchId)).clips[0];
+    expect(edited.current).toMatchObject({ version: 2, export_status: "ready" });
+    expect(await cp.approvedClipVersions(getDb()!, launchId)).toEqual([]);
+    await expect(cp.reviewClip(launchId, c.current.id, "approved", "")).rejects.toMatchObject({ code: "INVALID_STATE_TRANSITION" });
+
+    storage.setStorageForTests(undefined);
+  });
+});

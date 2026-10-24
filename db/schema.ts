@@ -616,3 +616,39 @@ export const launch_recordings = pgTable("launch_recordings", {
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 });
+
+export const launch_clips = pgTable("launch_clips", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	organization_id: uuid().notNull(),
+	launch_id: uuid().notNull(),
+	recording_id: uuid(),
+	position: integer().notNull(),
+	status: text().default('active').notNull(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+});
+
+export const launch_clip_versions = pgTable("launch_clip_versions", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	clip_id: uuid().notNull(),
+	launch_id: uuid().notNull(),
+	organization_id: uuid().notNull(),
+	version: integer().notNull(),
+	content: jsonb().notNull(),
+	export_status: text().default('not_started').notNull(),
+	export_path: text(),
+	export_error: text(),
+	created_by: uuid(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+});
+
+export const launch_clip_reviews = pgTable("launch_clip_reviews", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	version_id: uuid().notNull(),
+	launch_id: uuid().notNull(),
+	organization_id: uuid().notNull(),
+	stage: text().notNull(),
+	decision: text().notNull(),
+	reason: text(),
+	reviewer_id: uuid(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+});
