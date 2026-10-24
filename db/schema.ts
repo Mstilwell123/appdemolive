@@ -1,7 +1,7 @@
 // Drizzle schema for db/migrations (introspected with drizzle-kit pull, snake_case keys kept).
 // The SQL migrations are the source of truth (foreign keys, triggers and functions live there);
 // this file only types queries. Regenerate it after changing them.
-import { pgTable, unique, uuid, text, boolean, timestamp, index, check, integer, jsonb, uniqueIndex, numeric, primaryKey, bigint } from "drizzle-orm/pg-core"
+import { pgTable, unique, uuid, text, boolean, timestamp, index, check, integer, jsonb, uniqueIndex, numeric, primaryKey, bigint, date, time } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 
@@ -650,5 +650,30 @@ export const launch_clip_reviews = pgTable("launch_clip_reviews", {
 	decision: text().notNull(),
 	reason: text(),
 	reviewer_id: uuid(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+});
+
+export const launch_plan_items = pgTable("launch_plan_items", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	organization_id: uuid().notNull(),
+	launch_id: uuid().notNull(),
+	clip_version_id: uuid().notNull(),
+	day: integer().notNull(),
+	planned_date: date({ mode: 'string' }).notNull(),
+	planned_time: time().notNull(),
+	timezone: text().notNull(),
+	channel: text().notNull(),
+	channel_owner: text().notNull(),
+	responsible: text().notNull(),
+	audience: text().notNull(),
+	objective: text().notNull(),
+	post_copy: text().notNull(),
+	destination_url: text(),
+	status: text().default('planned').notNull(),
+	posted_url: text(),
+	posted_at: timestamp({ withTimezone: true, mode: 'string' }),
+	reported_by: uuid(),
+	confirmed_by: uuid(),
+	confirmed_at: timestamp({ withTimezone: true, mode: 'string' }),
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 });
