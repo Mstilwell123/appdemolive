@@ -1,0 +1,627 @@
+{
+  "samples": [
+    {
+      "id": "shiftswap",
+      "launchType": "founder_demo",
+      "goal": "Free trial signups from restaurant owners",
+      "brief": {
+        "appName": "ShiftSwap",
+        "websiteUrl": null,
+        "founderDescription": "A mobile app where hourly restaurant staff trade shifts with each other, and the manager approves swaps with one tap. It checks overtime and certifications before a swap is allowed.",
+        "targetCustomer": "Owners and general managers of independent restaurants with 15 to 60 hourly staff",
+        "problemSolved": "Managers spend hours every week on group texts and last-minute call-outs, and shifts still go uncovered.",
+        "desiredOutcome": "Every shift covered without the manager chasing people",
+        "pricingSummary": "$4 per staff member per month, 14-day free trial",
+        "primaryCta": "Start a free 14-day trial",
+        "competitors": "Group texts, 7shifts, When I Work"
+      },
+      "analysis": {
+        "summary": "ShiftSwap is a mobile app designed to streamline the process of shift swapping among hourly restaurant staff. It allows staff to trade shifts with manager approval, ensuring compliance with overtime rules and certifications.",
+        "targetCustomers": [
+          {
+            "segment": "Owners and general managers of independent restaurants with 15 to 60 hourly staff",
+            "problems": [
+              "Managers spend hours coordinating shifts through group texts.",
+              "Last-minute call-outs leave shifts uncovered."
+            ],
+            "outcomes": [
+              "Every shift is covered without manager intervention.",
+              "Reduced time spent on shift management."
+            ]
+          }
+        ],
+        "primaryProblem": "Managers spend significant time managing shift swaps and still face uncovered shifts.",
+        "primaryOutcome": "Every shift covered without the manager chasing people.",
+        "differentiators": [
+          "One-tap manager approval for shift swaps.",
+          "Checks for overtime and certifications before allowing swaps.",
+          "Specifically designed for independent restaurants."
+        ],
+        "objections": [
+          "Concerns about staff adoption and usage of the app.",
+          "Potential resistance from managers used to traditional methods."
+        ],
+        "demoMoments": [
+          "Show how easy it is for staff to request a shift swap.",
+          "Demonstrate the one-tap approval process for managers.",
+          "Highlight the overtime and certification checks in action."
+        ],
+        "useCases": [
+          "A restaurant facing frequent last-minute shift cancellations can quickly fill shifts using the app.",
+          "A manager who wants to reduce time spent on shift management can implement the app for their team."
+        ],
+        "claimsRequiringVerification": [
+          "The effectiveness of reducing time spent on shift management.",
+          "The success rate of covering shifts using the app."
+        ],
+        "missingInformation": [
+          "Website URL for the app.",
+          "Details on user acquisition strategy.",
+          "Information on customer support and onboarding process.",
+          "Any testimonials or case studies from early users."
+        ]
+      },
+      "strategy": {
+        "launchObjective": "Free trial signups from restaurant owners.",
+        "primaryAudience": "Owners and general managers of independent restaurants with 15 to 60 hourly staff.",
+        "positioning": {
+          "problem": "Managers spend significant time managing shift swaps and still face uncovered shifts.",
+          "promise": "Every shift covered without the manager chasing people.",
+          "proof": "The app allows staff to trade shifts with manager approval, ensuring compliance with overtime rules and certifications."
+        },
+        "recommendedHook": "Imagine never having to chase down staff to cover a shift again.",
+        "demonstrationSequence": [
+          {
+            "step": "Introduce ShiftSwap and its purpose.",
+            "minutes": 2
+          },
+          {
+            "step": "Show how easy it is for staff to request a shift swap through the app.",
+            "minutes": 4
+          },
+          {
+            "step": "Demonstrate the one-tap approval process for managers.",
+            "minutes": 3
+          },
+          {
+            "step": "Highlight the overtime and certification checks in action.",
+            "minutes": 3
+          },
+          {
+            "step": "Present a use case: filling a shift after a last-minute cancellation.",
+            "minutes": 2
+          },
+          {
+            "step": "Summarize the benefits and invite questions.",
+            "minutes": 1
+          }
+        ],
+        "customerQuestions": [
+          "How will my staff adapt to using the app?",
+          "What support do you provide during onboarding?",
+          "Can you share success stories from other restaurants?"
+        ],
+        "primaryCta": {
+          "text": "Sign up for a free trial today!",
+          "rationale": "Experience how ShiftSwap can streamline your shift management and ensure every shift is covered."
+        },
+        "risks": [
+          "Concerns about staff adoption and usage of the app.",
+          "Potential resistance from managers used to traditional methods."
+        ]
+      },
+      "questions": [
+        {
+          "question": "How much does ShiftSwap cost?",
+          "whyItMatters": "Understanding the pricing will help restaurant owners assess if the investment aligns with their budget."
+        },
+        {
+          "question": "What if my staff doesn't want to use the app?",
+          "whyItMatters": "Concerns about adoption can hinder decision-making; addressing this shows you understand their challenges."
+        },
+        {
+          "question": "How does ShiftSwap ensure compliance with labor laws?",
+          "whyItMatters": "Restaurant owners need to know that the app won't put them at risk of violating labor regulations."
+        },
+        {
+          "question": "Can you guarantee that every shift will be covered?",
+          "whyItMatters": "This is a critical outcome for managers; they want assurance that their staffing issues will be resolved."
+        },
+        {
+          "question": "What support do you provide during onboarding?",
+          "whyItMatters": "Owners want to know how easy it will be to implement the app and what help is available."
+        },
+        {
+          "question": "What happens if there’s a technical issue with the app?",
+          "whyItMatters": "Trust in the reliability of the app is crucial, and they need to know how issues will be handled."
+        },
+        {
+          "question": "Can you share any success stories or testimonials from current users?",
+          "whyItMatters": "Real-world examples can build credibility and trust in your solution."
+        },
+        {
+          "question": "How does ShiftSwap compare to other shift management tools?",
+          "whyItMatters": "Owners may be considering multiple options; differentiating your app can help them make a decision."
+        },
+        {
+          "question": "What features are included in the free trial?",
+          "whyItMatters": "Clarity on the trial will affect their willingness to sign up and evaluate the app."
+        },
+        {
+          "question": "How does the app handle overtime and certification checks?",
+          "whyItMatters": "Understanding the specifics of these features can alleviate concerns about compliance and staff management."
+        }
+      ],
+      "runbook": {
+        "title": "ShiftSwap Live Demo",
+        "durationMinutes": 15,
+        "openingHook": "Imagine never having to chase down staff to cover a shift again.",
+        "problemStatement": "Managers spend significant time managing shift swaps and still face uncovered shifts.",
+        "demoPlan": [
+          {
+            "step": "Introduce ShiftSwap and its purpose.",
+            "minutes": 2,
+            "script": "Welcome everyone. Today, I'm excited to introduce you to ShiftSwap, the app designed to simplify shift management for restaurant owners and managers. Our goal is to ensure every shift is covered without the hassle of chasing down staff."
+          },
+          {
+            "step": "Show how easy it is for staff to request a shift swap through the app.",
+            "minutes": 4,
+            "script": "Let’s dive into the app. Here, you can see how easy it is for staff to request a shift swap. They simply select their shift and propose a swap with another team member. It’s user-friendly and designed to minimize the time spent on this process."
+          },
+          {
+            "step": "Demonstrate the one-tap approval process for managers.",
+            "minutes": 3,
+            "script": "Now, let’s look at the manager's side. With just one tap, managers can approve or deny the swap requests. This streamlined process saves time and ensures that you maintain control over your schedule."
+          },
+          {
+            "step": "Highlight the overtime and certification checks in action.",
+            "minutes": 3,
+            "script": "Next, I want to highlight the built-in checks for overtime and certifications. When a staff member requests a swap, the app automatically checks compliance, ensuring you never have to worry about overtime violations or unqualified staff covering shifts."
+          },
+          {
+            "step": "Present a use case: filling a shift after a last-minute cancellation.",
+            "minutes": 2,
+            "script": "Let’s consider a real-world scenario. Imagine a last-minute cancellation. With ShiftSwap, your staff can quickly find someone to cover the shift, ensuring that your restaurant operates smoothly without any gaps."
+          },
+          {
+            "step": "Summarize the benefits and invite questions.",
+            "minutes": 1,
+            "script": "In summary, ShiftSwap not only saves you time but also ensures that every shift is covered efficiently. Now, I’d love to hear your questions."
+          }
+        ],
+        "useCases": [],
+        "questions": [
+          "How will my staff adapt to using the app?",
+          "What support do you provide during onboarding?",
+          "Can you share success stories from other restaurants?"
+        ],
+        "ctaScript": "Sign up for a free trial today! Experience how ShiftSwap can streamline your shift management and ensure every shift is covered.",
+        "closingScript": "Thank you for joining me today. I look forward to seeing you sign up for your free trial and transforming your shift management process."
+      },
+      "provenance": {
+        "model": "gpt-4o-mini-2024-07-18",
+        "promptVersions": [
+          "analyze-product-v1",
+          "launch-strategy-v2",
+          "customer-questions-v1",
+          "runbook-v2"
+        ],
+        "mocked": false,
+        "generatedAt": "2026-09-28T02:30:13.551Z",
+        "durationMs": 10168
+      }
+    },
+    {
+      "id": "invoicepilot",
+      "launchType": "cohosted_launch",
+      "goal": "Paid signups from freelancers",
+      "brief": {
+        "appName": "InvoicePilot",
+        "websiteUrl": null,
+        "founderDescription": "A web app for freelancers that reads a signed proposal, creates the invoices on the agreed schedule, and sends polite reminders until the client pays. It connects to Stripe and QuickBooks.",
+        "targetCustomer": "Freelance designers, developers and consultants billing $5k to $30k per month",
+        "problemSolved": "Freelancers lose money and time to late payments and awkward follow-up emails.",
+        "desiredOutcome": "Get paid on time without chasing clients",
+        "pricingSummary": "$19 per month, cancel anytime",
+        "primaryCta": "Create your first invoice schedule",
+        "competitors": "FreshBooks, Bonsai, spreadsheets and manual reminders"
+      },
+      "analysis": {
+        "summary": "InvoicePilot is a web app designed specifically for freelancers, automating the process of invoice creation and follow-ups based on signed proposals. It aims to streamline billing and improve cash flow by ensuring timely payments from clients.",
+        "targetCustomers": [
+          {
+            "segment": "Freelance designers, developers, and consultants",
+            "problems": [
+              "Late payments from clients",
+              "Time wasted on follow-up emails",
+              "Difficulty managing invoicing schedules"
+            ],
+            "outcomes": [
+              "Get paid on time",
+              "Reduce time spent on chasing payments",
+              "Improve cash flow management"
+            ]
+          }
+        ],
+        "primaryProblem": "Freelancers lose money and time to late payments and awkward follow-up emails.",
+        "primaryOutcome": "Get paid on time without chasing clients.",
+        "differentiators": [
+          "Automates invoice creation based on signed proposals",
+          "Sends polite payment reminders automatically",
+          "Integrates with Stripe and QuickBooks for seamless transactions"
+        ],
+        "objections": [
+          "Concerns about the reliability of automated reminders",
+          "Willingness to pay for a subscription service",
+          "Skepticism about integration with existing tools"
+        ],
+        "demoMoments": [
+          "Show how to upload a signed proposal",
+          "Demonstrate the invoice creation process",
+          "Illustrate the reminder system in action"
+        ],
+        "useCases": [
+          "Freelancer onboarding new clients",
+          "Setting up invoice schedules for multiple projects",
+          "Tracking payment statuses easily"
+        ],
+        "claimsRequiringVerification": [
+          "Integration capabilities with Stripe and QuickBooks",
+          "Effectiveness of the reminder system in improving payment times",
+          "User feedback on time saved using the app"
+        ],
+        "missingInformation": [
+          "Website URL for product access",
+          "Specific metrics or testimonials from early users",
+          "Details on data security and compliance measures",
+          "Information on customer support options",
+          "Any trial period or money-back guarantee details"
+        ]
+      },
+      "strategy": {
+        "launchObjective": "Generate paid signups from freelancers.",
+        "primaryAudience": "Freelance designers, developers, and consultants.",
+        "positioning": {
+          "problem": "Freelancers lose money and time to late payments and awkward follow-up emails.",
+          "promise": "Get paid on time without chasing clients.",
+          "proof": "InvoicePilot automates invoice creation based on signed proposals and sends polite payment reminders."
+        },
+        "recommendedHook": "Streamline your invoicing process and improve your cash flow with InvoicePilot.",
+        "demonstrationSequence": [
+          {
+            "step": "Introduction to InvoicePilot and its benefits for freelancers",
+            "minutes": 5
+          },
+          {
+            "step": "Show how to upload a signed proposal to the platform",
+            "minutes": 10
+          },
+          {
+            "step": "Demonstrate the invoice creation process, highlighting automation features",
+            "minutes": 10
+          },
+          {
+            "step": "Illustrate the reminder system in action, showing how it sends automatic payment reminders",
+            "minutes": 5
+          }
+        ],
+        "customerQuestions": [
+          "How does InvoicePilot ensure my reminders are reliable?",
+          "What if I want to cancel my subscription?",
+          "How does InvoicePilot integrate with my existing tools like Stripe and QuickBooks?"
+        ],
+        "primaryCta": {
+          "text": "Sign up for a free trial today and start getting paid on time!",
+          "rationale": "This encourages freelancers to experience the benefits of InvoicePilot firsthand."
+        },
+        "risks": [
+          "Concerns about the reliability of automated reminders.",
+          "Willingness to pay for a subscription service.",
+          "Skepticism about integration with existing tools."
+        ]
+      },
+      "questions": [
+        {
+          "question": "How does InvoicePilot ensure that payment reminders are effective and not annoying to clients?",
+          "whyItMatters": "Prospective customers want to know if the automated reminders will actually help them get paid on time without damaging client relationships."
+        },
+        {
+          "question": "What is the pricing structure for InvoicePilot, and are there any hidden fees?",
+          "whyItMatters": "Understanding the cost is crucial for freelancers who often operate on tight budgets and need to assess the value of the service."
+        },
+        {
+          "question": "Can you explain how InvoicePilot integrates with tools like Stripe and QuickBooks?",
+          "whyItMatters": "Customers may be skeptical about integration capabilities and want reassurance that the app will fit seamlessly into their existing workflows."
+        },
+        {
+          "question": "What measures are in place to ensure the security of my financial data?",
+          "whyItMatters": "Data security is a major concern for freelancers who handle sensitive client information and want to avoid breaches."
+        },
+        {
+          "question": "Can you provide any testimonials or metrics from users who have seen improvements in their payment processes?",
+          "whyItMatters": "Prospective customers may be hesitant to trust a new product without evidence of its effectiveness from real users."
+        },
+        {
+          "question": "What kind of customer support is available if I encounter issues with the app?",
+          "whyItMatters": "Freelancers need to know they can get help quickly if they run into problems, as downtime can affect their cash flow."
+        },
+        {
+          "question": "How long does it take to set up InvoicePilot and start using it effectively?",
+          "whyItMatters": "Customers want to understand the time investment required to start seeing benefits from the app."
+        },
+        {
+          "question": "What happens if I decide to cancel my subscription? Is there a money-back guarantee?",
+          "whyItMatters": "Understanding the cancellation policy helps customers feel more secure in their decision to try the service."
+        },
+        {
+          "question": "Can InvoicePilot handle multiple clients and projects simultaneously?",
+          "whyItMatters": "Freelancers often juggle various clients and need to know if the app can manage their diverse invoicing needs."
+        },
+        {
+          "question": "What specific features differentiate InvoicePilot from other invoicing tools on the market?",
+          "whyItMatters": "Customers want to know what makes InvoicePilot unique and why they should choose it over competitors."
+        }
+      ],
+      "runbook": {
+        "title": "InvoicePilot Live Demo",
+        "durationMinutes": 30,
+        "openingHook": "Streamline your invoicing process and improve your cash flow with InvoicePilot.",
+        "problemStatement": "Freelancers lose money and time to late payments and awkward follow-up emails.",
+        "demoPlan": [
+          {
+            "step": "Introduction to InvoicePilot and its benefits for freelancers",
+            "minutes": 5,
+            "script": "Welcome everyone. Today, we’re diving into how InvoicePilot can revolutionize your invoicing process. As freelancers, you know the struggle of late payments and the hassle of following up with clients. InvoicePilot is designed to help you get paid on time without the stress."
+          },
+          {
+            "step": "Show how to upload a signed proposal to the platform",
+            "minutes": 10,
+            "script": "Let’s jump into the platform. First, I’ll show you how easy it is to upload a signed proposal. This is the foundation of our automation. By uploading your signed proposals, you set the stage for seamless invoice creation."
+          },
+          {
+            "step": "Demonstrate the invoice creation process, highlighting automation features",
+            "minutes": 10,
+            "script": "Now that we have our proposal uploaded, watch how quickly InvoicePilot generates an invoice. This process is automated, saving you time and ensuring accuracy. You’ll see how it pulls in all the necessary details from your proposal."
+          },
+          {
+            "step": "Illustrate the reminder system in action, showing how it sends automatic payment reminders",
+            "minutes": 5,
+            "script": "Finally, let’s take a look at our reminder system. I’ll show you how InvoicePilot sends automatic payment reminders to your clients, ensuring you get paid on time without having to chase them down."
+          }
+        ],
+        "useCases": [
+          "Freelancers managing multiple clients",
+          "Designers needing timely payments for projects",
+          "Developers automating their invoicing process"
+        ],
+        "questions": [
+          "How does InvoicePilot ensure my reminders are reliable?",
+          "What if I want to cancel my subscription?",
+          "How does InvoicePilot integrate with my existing tools like Stripe and QuickBooks?"
+        ],
+        "ctaScript": "Sign up for a free trial today and start getting paid on time! This is your chance to experience the benefits of InvoicePilot firsthand.",
+        "closingScript": "Thank you for joining us today. We hope you see how InvoicePilot can transform your invoicing process. Don’t miss out on the opportunity to streamline your payments and improve your cash flow."
+      },
+      "provenance": {
+        "model": "gpt-4o-mini-2024-07-18",
+        "promptVersions": [
+          "analyze-product-v1",
+          "launch-strategy-v2",
+          "customer-questions-v1",
+          "runbook-v2"
+        ],
+        "mocked": false,
+        "generatedAt": "2026-09-28T02:30:23.392Z",
+        "durationMs": 9840
+      }
+    },
+    {
+      "id": "clinicqueue",
+      "launchType": "founder_demo",
+      "goal": "Booked demos with clinic managers",
+      "brief": {
+        "appName": "ClinicQueue",
+        "websiteUrl": null,
+        "founderDescription": "A text-message check-in and waitlist for walk-in clinics. Patients join the line from their phone, get a text when it's almost their turn, and can wait in their car instead of the lobby.",
+        "targetCustomer": "Practice managers at urgent care and walk-in clinics",
+        "problemSolved": "Crowded waiting rooms, patients leaving before being seen, and front-desk staff answering 'how much longer?' all day.",
+        "desiredOutcome": "Fewer walkouts and a calmer front desk",
+        "pricingSummary": "$199 per location per month",
+        "primaryCta": "Book a 20-minute demo",
+        "competitors": "Paper sign-in sheets, Solv, Clockwise.MD"
+      },
+      "analysis": {
+        "summary": "ClinicQueue is a text-message check-in and waitlist solution designed for walk-in clinics, allowing patients to join the queue from their phones and wait comfortably outside instead of in crowded lobbies.",
+        "targetCustomers": [
+          {
+            "segment": "Practice managers at urgent care and walk-in clinics",
+            "problems": [
+              "Crowded waiting rooms",
+              "Patients leaving before being seen",
+              "Front-desk staff overwhelmed with inquiries about wait times"
+            ],
+            "outcomes": [
+              "Fewer walkouts",
+              "Calmer front desk environment"
+            ]
+          }
+        ],
+        "primaryProblem": "Crowded waiting rooms and inefficient patient management in walk-in clinics.",
+        "primaryOutcome": "Fewer walkouts and a calmer front desk environment.",
+        "differentiators": [
+          "Text-message notifications for patients",
+          "Allows patients to wait in their car instead of the lobby",
+          "Reduces the burden on front-desk staff"
+        ],
+        "objections": [
+          "Concerns about patient adoption of text messaging",
+          "Skepticism about the effectiveness compared to traditional check-in methods",
+          "Potential integration challenges with existing systems"
+        ],
+        "demoMoments": [
+          "Showing how easy it is for patients to join the queue via text",
+          "Demonstrating the front-desk dashboard for managing patient flow",
+          "Highlighting real-time notifications sent to patients"
+        ],
+        "useCases": [
+          "Urgent care clinics managing high patient volumes",
+          "Walk-in clinics looking to improve patient satisfaction",
+          "Practices wanting to reduce front-desk workload"
+        ],
+        "claimsRequiringVerification": [
+          "The effectiveness of reducing walkouts",
+          "The level of patient satisfaction improvement",
+          "Integration capabilities with existing clinic systems"
+        ],
+        "missingInformation": [
+          "Website URL for more information",
+          "Specific metrics or case studies on the effectiveness of the solution",
+          "Details on security measures for patient data",
+          "Information on customer support and onboarding process",
+          "Any existing customer testimonials or pilot results"
+        ]
+      },
+      "strategy": {
+        "launchObjective": "Book demos with clinic managers.",
+        "primaryAudience": "Practice managers at urgent care and walk-in clinics.",
+        "positioning": {
+          "problem": "Crowded waiting rooms and inefficient patient management in walk-in clinics.",
+          "promise": "Reduce walkouts and create a calmer front desk environment.",
+          "proof": "Demonstrating real-time notifications and the ease of patient queue management."
+        },
+        "recommendedHook": "Imagine a world where your patients can check in from their phones and wait comfortably outside instead of in a crowded lobby.",
+        "demonstrationSequence": [
+          {
+            "step": "Introduce ClinicQueue and its purpose.",
+            "minutes": 2
+          },
+          {
+            "step": "Show how easy it is for patients to join the queue via text message.",
+            "minutes": 5
+          },
+          {
+            "step": "Demonstrate the front-desk dashboard for managing patient flow.",
+            "minutes": 5
+          },
+          {
+            "step": "Highlight real-time notifications sent to patients about their wait status.",
+            "minutes": 3
+          },
+          {
+            "step": "Summarize key benefits and invite questions.",
+            "minutes": 1
+          }
+        ],
+        "customerQuestions": [
+          "How do we ensure patient adoption of the text messaging system?",
+          "What support do you provide for integration with our existing systems?",
+          "Can you share any metrics or case studies on the effectiveness of your solution?"
+        ],
+        "primaryCta": {
+          "text": "Book a demo to see ClinicQueue in action.",
+          "rationale": "This will allow clinic managers to understand how ClinicQueue can specifically address their challenges."
+        },
+        "risks": [
+          "Concerns about patient adoption of text messaging may hinder implementation.",
+          "Skepticism about effectiveness compared to traditional methods could affect interest.",
+          "Integration challenges with existing systems may arise."
+        ]
+      },
+      "questions": [
+        {
+          "question": "How do you ensure that patients will adopt this text-message check-in system?",
+          "whyItMatters": "Patient adoption is crucial for the success of the solution. If patients are not comfortable using text messaging, the system won't be effective."
+        },
+        {
+          "question": "What evidence do you have that ClinicQueue reduces walkouts compared to traditional methods?",
+          "whyItMatters": "Skepticism about effectiveness needs to be addressed with data or case studies to build trust and credibility."
+        },
+        {
+          "question": "Can ClinicQueue integrate with our existing practice management systems?",
+          "whyItMatters": "Integration challenges can hinder implementation; understanding compatibility is key for practice managers."
+        },
+        {
+          "question": "What security measures are in place to protect patient data?",
+          "whyItMatters": "Trust in handling sensitive information is essential for clinics, and concerns about data security can be a significant barrier."
+        },
+        {
+          "question": "What is the pricing structure for ClinicQueue? Are there any hidden fees?",
+          "whyItMatters": "Clarity on pricing helps clinics budget appropriately and avoid surprises that could lead to objections."
+        },
+        {
+          "question": "How does ClinicQueue handle high patient volumes during peak times?",
+          "whyItMatters": "Understanding the system's scalability and reliability during busy periods is critical for urgent care clinics."
+        },
+        {
+          "question": "What kind of support and training do you provide for our staff?",
+          "whyItMatters": "Effective onboarding and support can influence a clinic's decision to adopt a new system."
+        },
+        {
+          "question": "Can you share any testimonials or success stories from current users?",
+          "whyItMatters": "Real-world examples and endorsements can significantly enhance credibility and alleviate concerns."
+        },
+        {
+          "question": "What happens if a patient has issues with the text-message system?",
+          "whyItMatters": "Addressing potential problems shows preparedness and reassures clinics about patient experience."
+        },
+        {
+          "question": "How quickly can we expect to see improvements in our waiting room environment after implementing ClinicQueue?",
+          "whyItMatters": "Understanding the timeline for results helps clinics set realistic expectations and assess the urgency of adoption."
+        }
+      ],
+      "runbook": {
+        "title": "ClinicQueue Live Demo",
+        "durationMinutes": 15,
+        "openingHook": "Imagine a world where your patients can check in from their phones and wait comfortably outside instead of in a crowded lobby.",
+        "problemStatement": "Crowded waiting rooms and inefficient patient management in walk-in clinics.",
+        "demoPlan": [
+          {
+            "step": "Introduce ClinicQueue and its purpose.",
+            "minutes": 2,
+            "script": "Welcome everyone. Today, I want to introduce you to ClinicQueue, a solution designed to tackle the challenges of crowded waiting rooms and inefficient patient management in walk-in clinics."
+          },
+          {
+            "step": "Show how easy it is for patients to join the queue via text message.",
+            "minutes": 4,
+            "script": "Let’s dive into how ClinicQueue works. Patients can join the queue simply by sending a text message. This means they can check in from their phones and avoid the crowded lobby."
+          },
+          {
+            "step": "Demonstrate the front-desk dashboard for managing patient flow.",
+            "minutes": 4,
+            "script": "Now, let me show you the front-desk dashboard. This tool allows staff to manage patient flow efficiently, ensuring that everyone is seen in a timely manner."
+          },
+          {
+            "step": "Highlight real-time notifications sent to patients about their wait status.",
+            "minutes": 3,
+            "script": "One of the key features is real-time notifications. Patients receive updates about their wait status, which keeps them informed and reduces anxiety."
+          },
+          {
+            "step": "Summarize key benefits and invite questions.",
+            "minutes": 2,
+            "script": "To summarize, ClinicQueue reduces walkouts and creates a calmer front desk environment. I’d love to hear your questions."
+          }
+        ],
+        "useCases": [],
+        "questions": [
+          "How do we ensure patient adoption of the text messaging system?",
+          "What support do you provide for integration with our existing systems?",
+          "Can you share any metrics or case studies on the effectiveness of your solution?"
+        ],
+        "ctaScript": "Book a demo to see ClinicQueue in action. This will allow clinic managers to understand how ClinicQueue can specifically address their challenges.",
+        "closingScript": "Thank you for joining today. I look forward to connecting with you and helping your clinic improve patient management."
+      },
+      "provenance": {
+        "model": "gpt-4o-mini-2024-07-18",
+        "promptVersions": [
+          "analyze-product-v1",
+          "launch-strategy-v2",
+          "customer-questions-v1",
+          "runbook-v2"
+        ],
+        "mocked": false,
+        "generatedAt": "2026-09-28T02:30:32.463Z",
+        "durationMs": 9070
+      }
+    }
+  ]
+}
