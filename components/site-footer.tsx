@@ -8,6 +8,8 @@ export function SiteFooter() {
         <Link href="/pricing" className="hover:text-slate-800">Pricing</Link>
         <Link href="/#faq" className="hover:text-slate-800">FAQ</Link>
         <Link href="/login" className="hover:text-slate-800">Log in</Link>
+        <Link href="/privacy" className="hover:text-slate-800">Privacy (draft)</Link>
+        <Link href="/terms" className="hover:text-slate-800">Terms (draft)</Link>
         <a href="mailto:support@pragvance.ai" className="hover:text-slate-800">Support</a>
       </nav>
       <p className="mt-4 text-center">© 2026 Pragvance LLC</p>
