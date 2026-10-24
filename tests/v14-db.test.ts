@@ -65,3 +65,32 @@ describe("R3 truth sheets", () => {
     await expect(asUser(db, alice.userId, () => db.query("update public.launch_truth_sheets set status='approved' where launch_id=$1", [launchId]))).rejects.toThrow();
   });
 });
+
+describe("R4 recordings", () => {
+  const rec = (launchId: string, status: string, path: string | null, transcript: string | null, failure: string | null = null) =>
+    db.query("insert into public.launch_recordings (organization_id, launch_id, source, status, storage_path, transcript, failure_code) values ($1,$2,'upload',$3,$4,$5,$6) returning id",
+      [alice.orgId, launchId, status, path, transcript, failure]);
+  it("can't be ready without a stored file and a non-empty transcript", async () => {
+    const { launchId } = await seedAppAndLaunch(db, alice.orgId, alice.userId, "rec-ready");
+    await expect(rec(launchId, "ready", null, '[{"text":"x"}]')).rejects.toThrow();
+    await expect(rec(launchId, "ready", "a/b/c.mp4", "[]")).rejects.toThrow();
+    await expect(rec(launchId, "ready", "a/b/c.mp4", null)).rejects.toThrow();
+    await rec(launchId, "ready", "a/b/c.mp4", '[{"text":"x"}]');
+  });
+  it("needs a file for uploaded/transcribing and a code for failed", async () => {
+    const { launchId } = await seedAppAndLaunch(db, alice.orgId, alice.userId, "rec-states");
+    await expect(rec(launchId, "uploaded", null, null)).rejects.toThrow();
+    await expect(rec(launchId, "failed", null, null)).rejects.toThrow();
+    await rec(launchId, "failed", null, null, "upload_missing");
+    await rec(launchId, "uploading", null, null);
+  });
+  it("is private to the org and read-only for clients", async () => {
+    const { launchId } = await seedAppAndLaunch(db, alice.orgId, alice.userId, "rec-rls");
+    await rec(launchId, "uploading", null, null);
+    await db.query("insert into public.launch_capture_plans (launch_id, organization_id, rehearsal_checked) values ($1,$2,'{clean_account}')", [launchId, alice.orgId]);
+    expect((await asUser(db, alice.userId, () => db.query("select id from public.launch_recordings where launch_id=$1", [launchId]))).rows).toHaveLength(1);
+    expect((await asUser(db, bob.userId, () => db.query("select id from public.launch_recordings where launch_id=$1", [launchId]))).rows).toHaveLength(0);
+    expect((await asUser(db, bob.userId, () => db.query("select launch_id from public.launch_capture_plans where launch_id=$1", [launchId]))).rows).toHaveLength(0);
+    await expect(asUser(db, alice.userId, () => db.query("update public.launch_recordings set status='ready' where launch_id=$1", [launchId]))).rejects.toThrow();
+  });
+});
