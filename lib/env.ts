@@ -19,3 +19,16 @@ export function authSecret(): string | null {
 export function isDatabaseConfigured(): boolean {
   return Boolean(databaseUrl() && authSecret());
 }
+
+/** Server-only. Resend credentials for transactional email; null when either is missing. */
+export function emailConfig(): { apiKey: string; from: string } | null {
+  if (typeof window !== "undefined") throw new Error("emailConfig() called in the browser");
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.EMAIL_FROM;
+  return apiKey && from ? { apiKey, from } : null;
+}
+
+/** Names of the email env vars that are not set, for clear error messages (never values). */
+export function missingEmailEnv(): string[] {
+  return (["RESEND_API_KEY", "EMAIL_FROM"] as const).filter((k) => !process.env[k]);
+}
