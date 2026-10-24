@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import data from "@/content/demo-samples.json";
+import { tabKeyTarget } from "@/lib/tabs";
 
 type Sample = (typeof data.samples)[number];
 
@@ -52,14 +53,14 @@ export function DemoWalkthrough() {
 
   return (
     <div className="mt-12">
-      <div role="tablist" aria-label="Sample products" className="grid gap-4 md:grid-cols-3">
+      <div role="group" aria-label="Fictional sample products" className="grid gap-4 md:grid-cols-3">
         {data.samples.map((s) => {
           const active = s.id === selected;
           return (
             <button
               key={s.id}
-              role="tab"
-              aria-selected={active}
+              type="button"
+              aria-pressed={active}
               onClick={() => pick(s.id)}
               className={`rounded-lg border p-5 text-left transition ${active ? "border-indigo-600 bg-indigo-50 ring-1 ring-indigo-600" : "border-slate-200 hover:border-indigo-300"}`}
             >
@@ -97,13 +98,16 @@ export function DemoWalkthrough() {
             </ol>
           )}
           {done && <Output sample={sample} onReplay={run} />}
+          {done && "corrections" in sample && Array.isArray(sample.corrections) && sample.corrections.map((c) => (
+            <p key={c.field} className="mt-4 rounded bg-amber-50 px-3 py-2 text-xs text-amber-900">Corrected: {c.reason}</p>
+          ))}
         </div>
       </div>
 
       <p className="mt-6 text-center text-sm text-slate-500">
         The sample products are fictional. The plans are real output from the same AI pipeline we use to prepare
-        paid launches ({sample.provenance.model}, generated {formatDate(sample.provenance.generatedAt)}), not hand-edited, and replayed here so
-        the demo is instant.
+        paid launches ({sample.provenance.model}, generated {formatDate(sample.provenance.generatedAt)}), replayed here so the demo is
+        instant. They are not edited, except where noted to remove a claim the brief doesn&apos;t make.
       </p>
     </div>
   );
@@ -137,6 +141,7 @@ function Brief({ sample }: { sample: Sample }) {
 
 function Output({ sample, onReplay }: { sample: Sample; onReplay: () => void }) {
   const [tab, setTab] = useState<"strategy" | "questions" | "runbook">("strategy");
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const s = sample.strategy;
   const r = sample.runbook;
   const tabs = [
@@ -148,12 +153,24 @@ function Output({ sample, onReplay }: { sample: Sample; onReplay: () => void }) 
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div role="tablist" aria-label="Generated plan" className="flex flex-wrap gap-2">
-          {tabs.map((t) => (
+          {tabs.map((t, i) => (
             <button
               key={t.id}
+              ref={(el) => { tabRefs.current[i] = el; }}
+              id={`plan-tab-${t.id}`}
+              type="button"
               role="tab"
               aria-selected={tab === t.id}
+              aria-controls="plan-panel"
+              tabIndex={tab === t.id ? 0 : -1}
               onClick={() => setTab(t.id)}
+              onKeyDown={(e) => {
+                const n = tabKeyTarget(i, e.key, tabs.length);
+                if (n === null) return;
+                e.preventDefault();
+                setTab(tabs[n].id);
+                tabRefs.current[n]?.focus();
+              }}
               className={`rounded-full px-4 py-2 text-sm font-medium ${tab === t.id ? "bg-indigo-600 text-white" : "border border-slate-200 text-slate-700 hover:border-indigo-300"}`}
             >
               {t.label}
@@ -163,6 +180,7 @@ function Output({ sample, onReplay }: { sample: Sample; onReplay: () => void }) 
         <button onClick={onReplay} className="text-sm font-medium text-indigo-600 hover:text-indigo-800">Replay</button>
       </div>
 
+      <div id="plan-panel" role="tabpanel" aria-labelledby={`plan-tab-${tab}`} tabIndex={0}>
       {tab === "strategy" && (
         <div className="mt-6 space-y-5 text-sm">
           <Field label="Launch objective">{s.launchObjective}</Field>
@@ -212,6 +230,7 @@ function Output({ sample, onReplay }: { sample: Sample; onReplay: () => void }) 
           <Field label="Call-to-action script" className="mt-4">{r.ctaScript}</Field>
         </div>
       )}
+      </div>
     </div>
   );
 }
