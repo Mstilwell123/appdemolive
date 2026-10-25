@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { SetupNotice } from "@/components/setup-notice";
 import { AppError } from "@/domain/errors";
 import { FOUNDER_STAGES, hasResultsStage, stageInfo } from "@/domain/launch-stages";
-import { isSupabaseConfigured } from "@/lib/env";
+import { isDatabaseConfigured } from "@/lib/env";
 import { getDashboardData, type DashboardData } from "@/services/dashboard";
 
 export const dynamic = "force-dynamic";
@@ -24,7 +24,7 @@ function formatWhen(iso: string) {
 }
 
 export default async function DashboardPage() {
-  if (!isSupabaseConfigured()) return <SetupNotice />;
+  if (!isDatabaseConfigured()) return <SetupNotice />;
 
   let data: DashboardData;
   try {

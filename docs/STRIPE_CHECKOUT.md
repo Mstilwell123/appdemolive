@@ -34,12 +34,12 @@ A founder pays for a launch on Stripe's hosted Checkout page. The launch stays i
 
 ## Order record
 
-`public.launch_orders` (migration `supabase/migrations/20260927000007_launch_orders.sql`):
+`public.launch_orders` (defined in `db/migrations/0001_baseline.sql`):
 `id`, `organization_id`, `launch_id`, `stripe_session_id` (unique), `status` (`pending` | `paid`),
 `amount` (minor units), `currency`, `created_at`, `paid_at`, `updated_at`. A check constraint keeps
-`paid_at` set exactly when status is `paid`. RLS: founders can read their own organization's
-orders; only server code (service role) can insert or update. Abandoned checkouts stay `pending`.
-Down migration: `drop table if exists public.launch_orders;`
+`paid_at` set exactly when status is `paid`. Access: founders read their own organization's
+orders through the services (scoped by organization); only server code inserts or updates them. Abandoned checkouts stay `pending`.
+Rollback: `db/rollbacks/0001_baseline.down.sql` (via `npm run db:rollback`).
 
 ## Environment variables
 
@@ -87,4 +87,4 @@ Copy that endpoint's signing secret into `STRIPE_WEBHOOK_SECRET` for that enviro
    is `PREPARATION` with a history entry "Payment confirmed by Stripe".
 
 Automated: `npm test` (unit tests for event mapping and signature checks; database tests for the
-order table's constraints, replay behavior and RLS).
+order table's constraints, replay behavior; tests/ownership.test.ts covers org scoping).

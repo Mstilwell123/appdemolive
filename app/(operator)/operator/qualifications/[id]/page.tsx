@@ -2,7 +2,7 @@ import Link from "next/link";
 import { SetupNotice } from "@/components/setup-notice";
 import { ErrorBanner, LaunchStatusBadge, LoadError, Panel, QualBadge, buttonClass, inputClass, when } from "@/components/ui";
 import { decisionProblem } from "@/domain/qualification";
-import { isSupabaseConfigured } from "@/lib/env";
+import { isDatabaseConfigured } from "@/lib/env";
 import { load } from "@/lib/page-load";
 import { AREA_LABELS, QUALIFICATION_AREAS, type AreaStatus, type QualificationArea } from "@/schemas/qualification";
 import { getQualificationReview } from "@/services/qualification";
@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? v[0] ?? null : v);
 
 export default async function QualificationReviewPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string }> }) {
-  if (!isSupabaseConfigured()) return <SetupNotice />;
+  if (!isDatabaseConfigured()) return <SetupNotice />;
   const { id } = await params;
   const { error } = await searchParams;
   const r = await load(`/operator/qualifications/${id}`, () => getQualificationReview(id));

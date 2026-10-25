@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { SetupNotice } from "@/components/setup-notice";
 import { ErrorBanner, LaunchStatusBadge, LoadError, Panel, QualBadge, buttonClass, secondaryButtonClass, when } from "@/components/ui";
-import { isSupabaseConfigured } from "@/lib/env";
+import { isDatabaseConfigured } from "@/lib/env";
 import { load } from "@/lib/page-load";
 import { getAppDetail } from "@/services/apps";
 import { createLaunchAction, createNextVersionAction } from "../../actions";
@@ -9,7 +9,7 @@ import { createLaunchAction, createNextVersionAction } from "../../actions";
 export const dynamic = "force-dynamic";
 
 export default async function AppPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string; submitted?: string }> }) {
-  if (!isSupabaseConfigured()) return <SetupNotice />;
+  if (!isDatabaseConfigured()) return <SetupNotice />;
   const { id } = await params;
   const { error, submitted } = await searchParams;
   const d = await load(`/dashboard/apps/${id}`, () => getAppDetail(id));

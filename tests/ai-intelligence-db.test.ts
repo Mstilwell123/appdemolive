@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import type { PGlite } from "@electric-sql/pglite";
-import { asUser, bootDb, createUser, seedAppAndLaunch } from "./db";
+import { bootDb, createUser, seedAppAndLaunch } from "./db";
 
 let db: PGlite;
 let alice: { userId: string; orgId: string };
@@ -51,20 +51,5 @@ describe("Phase 3 AI tables", () => {
     await expect(
       db.query("insert into public.launch_strategies (organization_id, launch_id, version, strategy) values ($1, $2, 1, '{}')", [bob.orgId, launchId]),
     ).rejects.toThrow();
-  });
-
-  it("lets members read their own AI records, hides them from other orgs, and blocks client writes", async () => {
-    const { launchId } = await seedAppAndLaunch(db, alice.orgId, alice.userId, "ai-rls");
-    await run(alice.orgId, launchId, "analyze_product");
-    await db.query("insert into public.launch_strategies (organization_id, launch_id, version, strategy) values ($1, $2, 1, '{}')", [alice.orgId, launchId]);
-    await db.query("insert into public.launch_runbooks (organization_id, launch_id, version, title, duration_minutes) values ($1, $2, 1, 'Show', 30)", [alice.orgId, launchId]);
-    for (const t of ["ai_runs", "launch_strategies", "launch_runbooks"]) {
-      const mine = await asUser(db, alice.userId, () => db.query(`select id from public.${t} where launch_id = $1`, [launchId]));
-      expect(mine.rows.length, t).toBe(1);
-      const theirs = await asUser(db, bob.userId, () => db.query(`select id from public.${t} where launch_id = $1`, [launchId]));
-      expect(theirs.rows.length, t).toBe(0);
-    }
-    await expect(asUser(db, alice.userId, () => run(alice.orgId, launchId, "generate_runbook"))).rejects.toThrow();
-    await expect(asUser(db, alice.userId, () => db.query("update public.launch_strategies set status = 'approved' where launch_id = $1", [launchId]))).rejects.toThrow();
   });
 });

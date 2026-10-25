@@ -1,13 +1,13 @@
 import { SetupNotice } from "@/components/setup-notice";
 import { ErrorBanner, TextArea, TextField, buttonClass, inputClass } from "@/components/ui";
-import { isSupabaseConfigured } from "@/lib/env";
+import { isDatabaseConfigured } from "@/lib/env";
 import { APP_CATEGORIES } from "@/schemas/app";
 import { createAppAction } from "../../actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewAppPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
-  if (!isSupabaseConfigured()) return <SetupNotice />;
+  if (!isDatabaseConfigured()) return <SetupNotice />;
   const { error } = await searchParams;
   return (
     <div className="max-w-2xl space-y-6">

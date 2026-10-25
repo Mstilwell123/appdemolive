@@ -1,40 +1,37 @@
 import "server-only";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { and, count, desc, eq, sql } from "drizzle-orm";
+import { experiments, launch_goals, launch_payments, launch_state_history, launches } from "@/db/schema";
 import { AppError, fromDbError } from "@/domain/errors";
 import { canTransition } from "@/domain/launch-state-machine";
 import { computeNextAction } from "@/domain/next-action";
-import { getServiceClient, getUserClient } from "@/lib/supabase/server";
+import { dbErrorMessage, queryRows, type Db } from "@/lib/db";
+import { authorizeLaunch } from "@/services/session";
 import type { ActorKind, LaunchStatus, LaunchType, NextAction } from "@/types/launch";
 
-/**
- * getLaunchNextAction (PRD §57). Reads through the user's client, so RLS guarantees the caller
- * can only see launches in their own organization.
- */
-export async function getLaunchNextAction(launchId: string): Promise<NextAction> {
-  const supabase = await getUserClient();
-  if (!supabase) throw new AppError("PROVIDER_UNAVAILABLE", "Supabase is not configured");
+async function countPrimaryGoals(db: Db, launchId: string) {
+  const [r] = await db.select({ n: count() }).from(launch_goals).where(and(eq(launch_goals.launch_id, launchId), eq(launch_goals.is_primary, true)));
+  return r?.n ?? 0;
+}
+async function countPayments(db: Db, launchId: string) {
+  const [r] = await db.select({ n: count() }).from(launch_payments).where(and(eq(launch_payments.launch_id, launchId), eq(launch_payments.status, "succeeded")));
+  return r?.n ?? 0;
+}
 
-  const { data: launch, error } = await supabase
-    .from("launches")
-    .select("id, status, app_id, scheduled_at, primary_cta_id")
-    .eq("id", launchId)
-    .maybeSingle();
-  if (error) throw new AppError("INTERNAL_ERROR", "Could not load launch");
+/** getLaunchNextAction (PRD §57). Only members of the launch's organization (or staff) can read it. */
+export async function getLaunchNextAction(launchId: string): Promise<NextAction> {
+  const { db } = await authorizeLaunch(launchId);
+  const [launch] = await db
+    .select({ id: launches.id, status: launches.status, app_id: launches.app_id, scheduled_at: launches.scheduled_at, primary_cta_id: launches.primary_cta_id })
+    .from(launches)
+    .where(eq(launches.id, launchId));
   if (!launch) throw new AppError("NOT_FOUND", "Launch not found");
 
-  const [{ count: primaryGoals }, { count: payments }] = await Promise.all([
-    supabase.from("launch_goals").select("id", { count: "exact", head: true }).eq("launch_id", launchId).eq("is_primary", true),
-    supabase.from("launch_payments").select("id", { count: "exact", head: true }).eq("launch_id", launchId).eq("status", "succeeded"),
-  ]);
+  const [primaryGoals, payments] = await Promise.all([countPrimaryGoals(db, launchId), countPayments(db, launchId)]);
 
   let experimentAwaitingApproval = false;
   if (launch.status === "EXPERIMENTING") {
-    const { count } = await supabase
-      .from("experiments")
-      .select("id", { count: "exact", head: true })
-      .eq("launch_id", launchId)
-      .eq("status", "awaiting_approval");
-    experimentAwaitingApproval = (count ?? 0) > 0;
+    const [r] = await db.select({ n: count() }).from(experiments).where(and(eq(experiments.launch_id, launchId), eq(experiments.status, "awaiting_approval")));
+    experimentAwaitingApproval = (r?.n ?? 0) > 0;
   }
 
   return computeNextAction({
@@ -43,73 +40,66 @@ export async function getLaunchNextAction(launchId: string): Promise<NextAction>
     appId: launch.app_id,
     scheduledAt: launch.scheduled_at,
     ctaConfigured: Boolean(launch.primary_cta_id),
-    primaryGoalSet: (primaryGoals ?? 0) === 1,
-    paymentSucceeded: (payments ?? 0) > 0,
+    primaryGoalSet: primaryGoals === 1,
+    paymentSucceeded: payments > 0,
     experimentAwaitingApproval,
   });
 }
 
 /**
- * Validates and applies one status change with the service client. Callers must already have
- * authorized the actor. transition_launch() re-validates, locks the row and writes history.
+ * Validates and applies one status change. Callers must already have authorized the actor.
+ * transition_launch() re-validates, locks the row and writes history.
  */
 export async function applyTransition(
-  service: SupabaseClient,
+  db: Db,
   input: { launchId: string; to: LaunchStatus; actorKind: ActorKind; actorId: string | null; reason?: string },
 ) {
-  const { data: launch } = await service
-    .from("launches")
-    .select("id, status, launch_type, scheduled_at")
-    .eq("id", input.launchId)
-    .maybeSingle();
+  const [launch] = await db
+    .select({ id: launches.id, status: launches.status, launch_type: launches.launch_type, scheduled_at: launches.scheduled_at })
+    .from(launches)
+    .where(eq(launches.id, input.launchId));
   if (!launch) throw new AppError("NOT_FOUND", "Launch not found");
 
-  const [{ count: primaryGoalCount }, { count: paymentCount }] = await Promise.all([
-    service.from("launch_goals").select("id", { count: "exact", head: true }).eq("launch_id", launch.id).eq("is_primary", true),
-    service.from("launch_payments").select("id", { count: "exact", head: true }).eq("launch_id", launch.id).eq("status", "succeeded"),
-  ]);
+  const [primaryGoalCount, paymentCount] = await Promise.all([countPrimaryGoals(db, launch.id), countPayments(db, launch.id)]);
 
   let resumeTo: LaunchStatus | null = null;
   if (launch.status === "PAUSED" || launch.status === "FAILED") {
-    const { data: last } = await service
-      .from("launch_state_history")
-      .select("from_status")
-      .eq("launch_id", launch.id)
-      .eq("to_status", launch.status)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const [last] = await db
+      .select({ from_status: launch_state_history.from_status })
+      .from(launch_state_history)
+      .where(and(eq(launch_state_history.launch_id, launch.id), eq(launch_state_history.to_status, launch.status)))
+      .orderBy(desc(launch_state_history.created_at))
+      .limit(1);
     resumeTo = (last?.from_status as LaunchStatus) ?? null;
   }
 
   const check = canTransition(launch.status as LaunchStatus, input.to, input.actorKind, {
     launchType: launch.launch_type as LaunchType | null,
     scheduledAt: launch.scheduled_at,
-    primaryGoalCount: primaryGoalCount ?? 0,
-    paymentSucceeded: (paymentCount ?? 0) > 0,
+    primaryGoalCount,
+    paymentSucceeded: paymentCount > 0,
     resumeTo,
   });
   if (!check.ok) throw check.error;
 
-  const { data, error } = await service.rpc("transition_launch", {
-    p_launch_id: launch.id,
-    p_expected_from: launch.status,
-    p_to: input.to,
-    p_actor_id: input.actorId,
-    p_actor_kind: input.actorKind,
-    p_reason: input.reason ?? null,
-  });
-  if (error) throw fromDbError(error.message);
-  return data;
+  try {
+    const [row] = await queryRows<Record<string, unknown>>(
+      db,
+      sql`select * from public.transition_launch(${launch.id}::uuid, ${launch.status}, ${input.to}, ${input.actorId}::uuid, ${input.actorKind}, ${input.reason ?? null})`,
+    );
+    return row ?? null;
+  } catch (e) {
+    throw fromDbError(dbErrorMessage(e));
+  }
 }
 
 /** Walks a launch through several statuses in order (each step validated). */
 export async function applyTransitions(
-  service: SupabaseClient,
+  db: Db,
   launchId: string,
   steps: Array<{ to: LaunchStatus; actorKind: ActorKind; actorId: string | null; reason?: string }>,
 ) {
-  for (const s of steps) await applyTransition(service, { launchId, ...s });
+  for (const s of steps) await applyTransition(db, { launchId, ...s });
 }
 
 /**
@@ -122,28 +112,6 @@ export async function transitionLaunch(input: {
   actorKind: Exclude<ActorKind, "system">;
   reason?: string;
 }) {
-  const userClient = await getUserClient();
-  const service = getServiceClient();
-  if (!userClient || !service) throw new AppError("PROVIDER_UNAVAILABLE", "Supabase is not configured");
-
-  const { data: auth } = await userClient.auth.getUser();
-  if (!auth.user) throw new AppError("UNAUTHORIZED", "Sign in required");
-
-  const { data: launch } = await service.from("launches").select("id, organization_id").eq("id", input.launchId).maybeSingle();
-  if (!launch) throw new AppError("NOT_FOUND", "Launch not found");
-
-  if (input.actorKind === "founder") {
-    const { data: member } = await service
-      .from("organization_members")
-      .select("id")
-      .eq("organization_id", launch.organization_id)
-      .eq("user_id", auth.user.id)
-      .maybeSingle();
-    if (!member) throw new AppError("NOT_FOUND", "Launch not found"); // don't reveal other tenants' launches
-  } else {
-    const { data: staff } = await service.from("platform_staff").select("role").eq("user_id", auth.user.id).maybeSingle();
-    if (!staff || !["admin", "operator"].includes(staff.role)) throw new AppError("FORBIDDEN", "Operator access required");
-  }
-
-  return applyTransition(service, { ...input, actorId: auth.user.id });
+  const { db, user } = await authorizeLaunch(input.launchId, [input.actorKind]);
+  return applyTransition(db, { ...input, actorId: user.id });
 }

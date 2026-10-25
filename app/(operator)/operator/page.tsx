@@ -1,19 +1,17 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { SetupNotice } from "@/components/setup-notice";
-import { isSupabaseConfigured } from "@/lib/env";
-import { getUserClient } from "@/lib/supabase/server";
+import { isDatabaseConfigured } from "@/lib/env";
+import { operatorAccess } from "@/services/session";
 
 export const dynamic = "force-dynamic";
 
 /** Operator console home. Only Pragvance platform staff get past the server-side check. */
 export default async function OperatorPage() {
-  if (!isSupabaseConfigured()) return <SetupNotice />;
-  const supabase = (await getUserClient())!;
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) redirect("/login?next=/operator");
-  const { data: isStaff } = await supabase.rpc("is_platform_staff");
-  if (!isStaff) notFound(); // don't reveal the console exists
+  if (!isDatabaseConfigured()) return <SetupNotice />;
+  const access = await operatorAccess();
+  if (access === "signed_out") redirect("/login?next=/operator");
+  if (access !== "ok") notFound(); // don't reveal the console exists
 
   return (
     <div>

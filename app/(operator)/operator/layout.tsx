@@ -1,18 +1,16 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { isSupabaseConfigured } from "@/lib/env";
-import { getUserClient } from "@/lib/supabase/server";
+import { isDatabaseConfigured } from "@/lib/env";
+import { operatorAccess } from "@/services/session";
 
 export const dynamic = "force-dynamic";
 
 /** Staff check lives in the layout so non-staff never see any operator chrome (a plain 404). */
 export default async function OperatorLayout({ children }: { children: React.ReactNode }) {
-  if (!isSupabaseConfigured()) return <main className="mx-auto max-w-5xl p-10">{children}</main>;
-  const supabase = (await getUserClient())!;
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) redirect("/login?next=/operator");
-  const { data: isStaff } = await supabase.rpc("is_platform_staff");
-  if (!isStaff) notFound();
+  if (!isDatabaseConfigured()) return <main className="mx-auto max-w-5xl p-10">{children}</main>;
+  const access = await operatorAccess();
+  if (access === "signed_out") redirect("/login?next=/operator");
+  if (access !== "ok") notFound();
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-slate-900 text-white">

@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { SetupNotice } from "@/components/setup-notice";
 import { Empty, LoadError, QualBadge, when } from "@/components/ui";
-import { isSupabaseConfigured } from "@/lib/env";
+import { isDatabaseConfigured } from "@/lib/env";
 import { load } from "@/lib/page-load";
 import { listQualificationQueue } from "@/services/qualification";
 
 export const dynamic = "force-dynamic";
 
 export default async function QualificationQueuePage({ searchParams }: { searchParams: Promise<{ decided?: string }> }) {
-  if (!isSupabaseConfigured()) return <SetupNotice />;
+  if (!isDatabaseConfigured()) return <SetupNotice />;
   const { decided } = await searchParams;
   const queue = await load("/operator/qualifications", listQualificationQueue);
   if (!queue) return <LoadError what="the queue" />;

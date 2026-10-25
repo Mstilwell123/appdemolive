@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { SetupNotice } from "@/components/setup-notice";
 import { ErrorBanner, LoadError, Panel, TextArea, TextField, buttonClass, secondaryButtonClass } from "@/components/ui";
-import { isSupabaseConfigured } from "@/lib/env";
+import { isDatabaseConfigured } from "@/lib/env";
 import { load } from "@/lib/page-load";
 import type { ProductAnalysis } from "@/integrations/ai/types";
 import { getAppDetail } from "@/services/apps";
@@ -10,7 +10,7 @@ import { saveIntakeAction } from "../../../actions";
 export const dynamic = "force-dynamic";
 
 export default async function IntakePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string; saved?: string }> }) {
-  if (!isSupabaseConfigured()) return <SetupNotice />;
+  if (!isDatabaseConfigured()) return <SetupNotice />;
   const { id } = await params;
   const { error, saved } = await searchParams;
   const d = await load(`/dashboard/apps/${id}/intake`, () => getAppDetail(id));

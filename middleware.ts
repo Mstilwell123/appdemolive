@@ -1,34 +1,24 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createServerClient } from "@supabase/ssr";
 
-/** Refreshes the Supabase session cookie and keeps signed-out users out of /dashboard and /operator. */
-export async function middleware(request: NextRequest) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  let response = NextResponse.next({ request });
-  if (!url || !key) return response; // Unconfigured: pages render their own setup notice.
+/**
+ * Fast redirect for visitors with no session cookie. This is only a convenience: every page,
+ * action and service still validates the session and org ownership on the server.
+ */
+// Better Auth's default session cookie (the __Secure- prefix is used over HTTPS).
+const SESSION_COOKIES = ["better-auth.session_token", "__Secure-better-auth.session_token"];
 
-  const supabase = createServerClient(url, key, {
-    cookies: {
-      getAll: () => request.cookies.getAll(),
-      setAll: (list) => {
-        list.forEach(({ name, value }) => request.cookies.set(name, value));
-        response = NextResponse.next({ request });
-        list.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
-      },
-    },
-  });
-  const { data } = await supabase.auth.getUser();
-  const path = request.nextUrl.pathname;
-  if (!data.user && (path.startsWith("/dashboard") || path.startsWith("/operator"))) {
+export function middleware(request: NextRequest) {
+  if (!process.env.DATABASE_URL) return NextResponse.next(); // Unconfigured: pages render their own setup notice.
+  if (!SESSION_COOKIES.some((name) => request.cookies.get(name)?.value)) {
     const login = request.nextUrl.clone();
     login.pathname = "/login";
-    login.searchParams.set("next", path);
+    login.search = "";
+    login.searchParams.set("next", request.nextUrl.pathname);
     return NextResponse.redirect(login);
   }
-  return response;
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/operator/:path*", "/auth/:path*"],
+  matcher: ["/dashboard/:path*", "/operator/:path*"],
 };

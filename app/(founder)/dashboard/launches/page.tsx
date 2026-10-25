@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { SetupNotice } from "@/components/setup-notice";
 import { Empty, LaunchStatusBadge, LoadError, money } from "@/components/ui";
-import { isSupabaseConfigured } from "@/lib/env";
+import { isDatabaseConfigured } from "@/lib/env";
 import { load } from "@/lib/page-load";
 import { listLaunches } from "@/services/launch-setup";
 
@@ -10,7 +10,7 @@ const TYPE = { founder_demo: "Founder Demo", cohosted_launch: "Co-Hosted Launch 
 const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? v[0] ?? null : v);
 
 export default async function LaunchesPage() {
-  if (!isSupabaseConfigured()) return <SetupNotice />;
+  if (!isDatabaseConfigured()) return <SetupNotice />;
   const launches = await load("/dashboard/launches", listLaunches);
   if (!launches) return <LoadError what="your launches" />;
   return (

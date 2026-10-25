@@ -2,39 +2,20 @@ import { PGlite } from "@electric-sql/pglite";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-/** Boots an in-memory Postgres with the Supabase shim and every migration applied. */
+/** Boots an in-memory Postgres with every db/migrations file applied, exactly as `npm run db:migrate` does. */
 export async function bootDb() {
   const db = new PGlite();
-  await db.exec(readFileSync(join(__dirname, "supabase-shim.sql"), "utf8"));
-  // Mirror Supabase: API roles get privileges on every new table and function by default,
-  // so migrations must explicitly revoke anything they want closed.
-  await db.exec(`
-    grant usage on schema public to anon, authenticated, service_role;
-    alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
-    alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
-  `);
-  const dir = join(__dirname, "..", "supabase", "migrations");
+  const dir = join(__dirname, "..", "db", "migrations");
   for (const file of readdirSync(dir).filter((f) => f.endsWith(".sql")).sort()) {
     await db.exec(readFileSync(join(dir, file), "utf8"));
   }
   return db;
 }
 
-/** Runs fn as a signed-in Supabase user (role authenticated, auth.uid() = userId). */
-export async function asUser<T>(db: PGlite, userId: string, fn: () => Promise<T>): Promise<T> {
-  await db.exec(`set role authenticated; select set_config('request.jwt.claim.sub', '${userId}', false);`);
-  try {
-    return await fn();
-  } finally {
-    await db.exec(`reset role; select set_config('request.jwt.claim.sub', '', false);`);
-  }
-}
-
+/** Creates an account the way sign-up does: a signup intent, then the Better Auth users row (the trigger makes the org). */
 export async function createUser(db: PGlite, email: string, org: string) {
-  const r = await db.query<{ id: string }>(
-    `insert into auth.users (email, raw_user_meta_data) values ($1, $2) returning id`,
-    [email, JSON.stringify({ full_name: email.split("@")[0], organization_name: org })],
-  );
+  await db.query("insert into public.signup_intents (email, full_name, organization_name) values ($1, $2, $3)", [email, email.split("@")[0], org]);
+  const r = await db.query<{ id: string }>("insert into public.users (email, name) values ($1, $2) returning id", [email, email.split("@")[0]]);
   const userId = r.rows[0].id;
   const m = await db.query<{ organization_id: string }>(
     `select organization_id from public.organization_members where user_id = $1`,
@@ -64,5 +45,15 @@ export async function seedAppAndLaunch(db: PGlite, orgId: string, userId: string
 export async function walk(db: PGlite, launchId: string, steps: Array<[string, string, string]>) {
   for (const [from, to, actor] of steps) {
     await db.query("select public.transition_launch($1, $2, $3, null, $4, null)", [launchId, from, to, actor]);
+  }
+}
+
+/** Runs fn with app.user_id set, as services/withActor does for create_app_with_intake and create_next_app_version. */
+export async function asActor<T>(db: PGlite, userId: string, fn: () => Promise<T>): Promise<T> {
+  await db.query("select set_config('app.user_id', $1, false)", [userId]);
+  try {
+    return await fn();
+  } finally {
+    await db.query("select set_config('app.user_id', '', false)");
   }
 }
