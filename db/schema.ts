@@ -285,6 +285,7 @@ export const experiment_results = pgTable("experiment_results", {
 	revenue_amount: integer(),
 	currency: text(),
 	metadata: jsonb(),
+	snapshot_id: uuid(),
 	calculated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	created_by: uuid(),
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),

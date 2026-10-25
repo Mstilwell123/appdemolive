@@ -158,3 +158,15 @@ describe("R7 tracked links", () => {
     await expect(db.query("insert into public.tracked_link_clicks (link_id, launch_id, visitor_hash, click_window) values ($1,$2,'0123456789abcdef0123',1)", [id, other])).rejects.toThrow();
   });
 });
+
+describe("R8 one open experiment per launch", () => {
+  it("allows a new experiment only after the open one ends", async () => {
+    const { launchId } = await seedAppAndLaunch(db, alice.orgId, alice.userId, "ex-db");
+    const ins = (status: string) => db.query("insert into public.experiments (organization_id, launch_id, name, independent_variable, primary_metric, status) values ($1,$2,'e','v','m',$3) returning id", [alice.orgId, launchId, status]);
+    const first = (await ins("running")).rows[0] as { id: string };
+    await expect(ins("draft")).rejects.toThrow();
+    await db.query("update public.experiments set status = 'completed' where id = $1", [first.id]);
+    await ins("running");
+    await expect(db.query("insert into public.experiments (organization_id, launch_id, name, independent_variable, primary_metric) values ($1,$2,'e','v','m')", [bob.orgId, launchId])).rejects.toThrow();
+  });
+});

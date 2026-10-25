@@ -287,3 +287,64 @@ describe("R7 tracked links", () => {
     expect((await GET(new NextRequest("http://localhost/r/nope-nope-nope"), { params: Promise.resolve({ slug: "nope-nope-nope" }) })).status).toBe(404);
   });
 });
+
+describe("R8 experiment", () => {
+  it("links a hypothesis to two tracked links, refuses a winner on thin data, and hides from other orgs", async () => {
+    const pp = await import("@/services/promotion-plan");
+    const tl = await import("@/services/tracked-links");
+    const ex = await import("@/services/experiments");
+    const { launchId, appId } = await seedAppAndLaunch(pg, alice.orgId, alice.userId, "svc-ex");
+    await pg.query("update public.apps set website_url = 'https://invoice.example.com/' where id = $1", [appId]);
+    await seedApprovedClip(pg, alice.orgId, launchId, alice.userId);
+    signIn(alice);
+    await pp.generatePromotionPlan(launchId, { channels: [{ channel: "x", owner: "founder" }], startDate: "2026-11-02", timezone: "UTC" });
+    await tl.createLinksForPlan(launchId);
+    const { links } = await ex.getImprove(launchId);
+    const [a, b] = links;
+    const { launchId: otherLaunch } = await seedAppAndLaunch(pg, alice.orgId, alice.userId, "svc-ex2");
+    const statement = "The second post's hook will draw more clicks";
+
+    await expect(ex.startExperiment(launchId, { statement, controlLinkId: a.id, variantLinkId: a.id })).rejects.toMatchObject({ code: "VALIDATION_FAILED" });
+    await expect(ex.startExperiment(otherLaunch, { statement, controlLinkId: a.id, variantLinkId: b.id })).rejects.toMatchObject(NF);
+    signIn(bob);
+    await expect(ex.getImprove(launchId)).rejects.toMatchObject(NF);
+    await expect(ex.startExperiment(launchId, { statement, controlLinkId: a.id, variantLinkId: b.id })).rejects.toMatchObject(NF);
+    signIn(staff);
+    await expect(ex.startExperiment(launchId, { statement, controlLinkId: a.id, variantLinkId: b.id })).rejects.toMatchObject(NF);
+    signIn(alice);
+
+    await ex.startExperiment(launchId, { statement, controlLinkId: a.id, variantLinkId: b.id });
+    await expect(ex.startExperiment(launchId, { statement, controlLinkId: a.id, variantLinkId: b.id })).rejects.toMatchObject({ code: "INVALID_STATE_TRANSITION" });
+
+    const click = (link: string, n: number) => pg.query(
+      "insert into public.tracked_link_clicks (link_id, launch_id, visitor_hash, click_window, clicked_at) select $1, $2, md5(random()::text || g::text), g, now() + interval '1 second' from generate_series(1, $3::int) g",
+      [link, launchId, n]);
+    await click(a.id, 2);
+    await click(b.id, 40);
+    let s = await ex.getImprove(launchId);
+    expect(s.experiment?.verdict.kind).toBe("insufficient_data");
+    await expect(ex.recordResults(launchId, true)).rejects.toMatchObject({ code: "INVALID_STATE_TRANSITION" });
+    expect(await ex.recordResults(launchId, false)).toMatchObject({ kind: "insufficient_data" });
+    s = await ex.getImprove(launchId);
+    expect(s.experiment?.status).toBe("running");
+    expect(s.experiment?.hypothesis?.status).toBe("testing");
+    expect(s.experiment?.hypothesis?.evidence_summary).toMatch(/control 2, variant 40/);
+    const snap = await pg.query<{ n: number }>("select count(*)::int n from public.experiment_results where experiment_id = $1", [s.experiment!.id]);
+    expect(snap.rows[0].n).toBe(2);
+
+    await click(a.id, 30);
+    await click(b.id, 60);
+    expect(await ex.recordResults(launchId, true)).toMatchObject({ kind: "winner", winner: "variant" });
+    s = await ex.getImprove(launchId);
+    expect(s.experiment?.status).toBe("completed");
+    expect(s.experiment?.hypothesis?.status).toBe("supported");
+
+    signIn(bob);
+    await expect(ex.recordResults(launchId)).rejects.toMatchObject(NF);
+    await expect(ex.cancelExperiment(launchId)).rejects.toMatchObject(NF);
+    signIn(alice);
+    await ex.startExperiment(launchId, { statement, controlLinkId: b.id, variantLinkId: a.id });
+    await ex.cancelExperiment(launchId);
+    expect((await ex.getImprove(launchId)).experiment?.status).toBe("cancelled");
+  });
+});
