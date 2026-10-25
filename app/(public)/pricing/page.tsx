@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { DEFAULT_LAUNCH_PRICES } from "@/integrations/billing/mock";
 
 const details: Record<string, string[]> = {
@@ -50,7 +51,7 @@ export default function PricingPage() {
           </div>
         </section>
       </main>
-      <footer className="py-8 text-center text-sm text-slate-500">© 2026 Pragvance LLC</footer>
+      <SiteFooter />
     </>
   );
 }

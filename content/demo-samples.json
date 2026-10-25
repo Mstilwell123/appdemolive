@@ -311,7 +311,7 @@
           "How does InvoicePilot integrate with my existing tools like Stripe and QuickBooks?"
         ],
         "primaryCta": {
-          "text": "Sign up for a free trial today and start getting paid on time!",
+          "text": "Create your first invoice schedule today and start getting paid on time!",
           "rationale": "This encourages freelancers to experience the benefits of InvoicePilot firsthand."
         },
         "risks": [
@@ -399,7 +399,7 @@
           "What if I want to cancel my subscription?",
           "How does InvoicePilot integrate with my existing tools like Stripe and QuickBooks?"
         ],
-        "ctaScript": "Sign up for a free trial today and start getting paid on time! This is your chance to experience the benefits of InvoicePilot firsthand.",
+        "ctaScript": "Create your first invoice schedule today and start getting paid on time. It's $19 a month and you can cancel anytime.",
         "closingScript": "Thank you for joining us today. We hope you see how InvoicePilot can transform your invoicing process. Don’t miss out on the opportunity to streamline your payments and improve your cash flow."
       },
       "provenance": {
@@ -413,7 +413,14 @@
         "mocked": false,
         "generatedAt": "2026-09-28T02:30:23.392Z",
         "durationMs": 9840
-      }
+      },
+      "corrections": [
+        {
+          "field": "strategy.primaryCta.text, runbook.ctaScript",
+          "reason": "The AI output invented a free trial that is not in the founder brief ($19/month, cancel anytime). Replaced with the brief's own CTA (PRD v1.4 R2).",
+          "date": "2026-10-24"
+        }
+      ]
     },
     {
       "id": "clinicqueue",
