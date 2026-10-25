@@ -9,15 +9,15 @@ import type { ReadableStream as WebReadableStream } from "node:stream/web";
 
 /**
  * File storage behind one small interface, so the app never depends on a specific provider.
- * Only the local adapter exists today. ASSUMPTION: no paid storage is adopted; when the app runs in
- * production without STORAGE_DRIVER=local, getStorage() returns null and callers report
+ * Adapters: local disk (dev) and Vercel Blob (STORAGE_DRIVER=blob with BLOB_READ_WRITE_TOKEN, free
+ * Hobby tier). When the app runs in production without a configured driver, getStorage() returns null and callers report
  * PROVIDER_UNAVAILABLE instead of pretending a file was saved.
  */
 export interface UploadTarget { url: string; method: "PUT"; headers: Record<string, string>; expiresAt: string }
 export interface StorageAdapter {
   readonly name: string;
   createUploadTarget(path: string, contentType: string, maxBytes: number): Promise<UploadTarget>;
-  exists(path: string): Promise<{ size: number } | null>;
+  exists(path: string): Promise<{ size: number; contentType?: string } | null>;
   read(path: string): Promise<Blob | null>;
   downloadUrl(path: string, ttlSeconds?: number): Promise<string>;
   remove(path: string): Promise<void>;
@@ -38,13 +38,10 @@ function secret() {
   return DEV_SECRET;
 }
 
-/** Object keys are org/launch/file style: no absolute paths, no "..", no backslashes. */
-export function safeKey(path: string): string | null {
-  if (!path || path.length > 500 || path.startsWith("/") || path.includes("\\") || path.includes("\0")) return null;
-  const parts = path.split("/");
-  if (parts.some((p) => !p || p === "." || p === ".." || !/^[A-Za-z0-9._-]+$/.test(p))) return null;
-  return path;
-}
+export { safeKey } from "./keys";
+import { safeKey } from "./keys";
+import { createBlobStorageAdapter } from "./blob";
+
 function fileFor(key: string) {
   const root = storageRoot();
   const full = resolve(root, key);
@@ -120,6 +117,7 @@ export const localStorageAdapter: StorageAdapter = {
   },
 };
 
+let blobAdapter: StorageAdapter | null = null;
 let override: StorageAdapter | null | undefined;
 /** Tests swap the adapter (or null to simulate "no storage configured"). */
 export function setStorageForTests(a: StorageAdapter | null | undefined) { override = a; }
@@ -128,6 +126,11 @@ export function getStorage(): StorageAdapter | null {
   if (override !== undefined) return override;
   const driver = process.env.STORAGE_DRIVER;
   if (driver === "local") return localStorageAdapter;
+  if (driver === "blob") {
+    if (!process.env.BLOB_READ_WRITE_TOKEN) return null;
+    blobAdapter ??= createBlobStorageAdapter();
+    return blobAdapter;
+  }
   if (!driver && process.env.NODE_ENV !== "production") return localStorageAdapter;
   return null;
 }
