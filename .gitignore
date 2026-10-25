@@ -51,3 +51,6 @@ next-env.d.ts
 .tmp
 *.tsbuildinfo
 next-env.d.ts
+
+# local storage adapter files
+.data

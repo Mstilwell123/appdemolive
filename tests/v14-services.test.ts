@@ -71,3 +71,60 @@ describe("R3 truth sheet service", () => {
     await expect(ts.getTruthSheet(launchId)).rejects.toMatchObject({ code: "UNAUTHORIZED" });
   });
 });
+
+describe("R4 recording service", () => {
+  it("only the launch's org can plan, upload and complete; completion needs the real file", async () => {
+    const { mkdtempSync } = await import("node:fs");
+    const { tmpdir } = await import("node:os");
+    const { join } = await import("node:path");
+    process.env.LOCAL_STORAGE_DIR = mkdtempSync(join(tmpdir(), "appdemo-rec-"));
+    const storage = await import("@/integrations/storage");
+    storage.setStorageForTests(storage.localStorageAdapter);
+    const r = await import("@/services/recordings");
+    const { launchId } = await seedAppAndLaunch(pg, alice.orgId, alice.userId, "svc-rec");
+    const file = { name: "demo.webm", type: "video/webm", size: 5 };
+
+    signIn(alice);
+    await expect(r.beginUpload(launchId, file, "upload")).rejects.toMatchObject({ code: "APPROVAL_REQUIRED" });
+    await r.saveCapturePlan(launchId, { choice: "upload", checked: ["clean_account", "screen_permission", "bogus"], confidential: "" });
+    expect((await r.getCapture(launchId)).plan?.rehearsal_checked).toEqual(["clean_account", "screen_permission"]);
+
+    signIn(bob);
+    await expect(r.getCapture(launchId)).rejects.toMatchObject(NF);
+    await expect(r.saveCapturePlan(launchId, { choice: null, checked: [], confidential: "" })).rejects.toMatchObject(NF);
+    await expect(r.beginUpload(launchId, file, "upload")).rejects.toMatchObject(NF);
+
+    signIn(alice);
+    const begun = await r.beginUpload(launchId, file, "upload");
+    expect(begun.upload.url).toMatch(/^\/api\/storage\?/);
+    signIn(bob);
+    await expect(r.completeUpload(launchId, begun.recordingId)).rejects.toMatchObject(NF);
+    signIn(alice);
+    await expect(r.completeUpload(launchId, begun.recordingId)).rejects.toMatchObject({ code: "PROCESSING_FAILED" });
+    expect((await r.getCapture(launchId)).recordings[0].status).toBe("failed");
+
+    const retry = await r.beginUpload(launchId, file, "upload", begun.recordingId);
+    const key = new URL(retry.upload.url, "http://x").searchParams.get("key")!;
+    expect(key.startsWith(`${alice.orgId}/${launchId}/`)).toBe(true);
+    const { writeFileSync, mkdirSync } = await import("node:fs");
+    const { dirname } = await import("node:path");
+    const full = join(storage.storageRoot(), key);
+    mkdirSync(dirname(full), { recursive: true });
+    writeFileSync(full, "hello");
+    await r.completeUpload(launchId, begun.recordingId);
+    expect((await r.getCapture(launchId)).recordings[0]).toMatchObject({ status: "uploaded", attempts: 2 });
+
+    signIn(alice);
+    await expect(r.transcribeRecording(launchId, begun.recordingId)).rejects.toMatchObject({ code: "FORBIDDEN" });
+    await r.attachTranscript(launchId, begun.recordingId, "WEBVTT\n\n00:00:01.000 --> 00:00:04.000\nHello there\n");
+    expect((await r.getCapture(launchId)).recordings[0]).toMatchObject({ status: "ready", transcript_source: "manual" });
+    expect(await r.recordingDownloadUrl(launchId, begun.recordingId)).toMatch(/op=get/);
+    signIn(bob);
+    await expect(r.recordingDownloadUrl(launchId, begun.recordingId)).rejects.toMatchObject(NF);
+
+    storage.setStorageForTests(null);
+    signIn(alice);
+    await expect(r.beginUpload(launchId, file, "upload")).rejects.toMatchObject({ code: "PROVIDER_UNAVAILABLE" });
+    storage.setStorageForTests(undefined);
+  });
+});

@@ -1,7 +1,7 @@
 // Drizzle schema for db/migrations (introspected with drizzle-kit pull, snake_case keys kept).
 // The SQL migrations are the source of truth (foreign keys, triggers and functions live there);
 // this file only types queries. Regenerate it after changing them.
-import { pgTable, unique, uuid, text, boolean, timestamp, index, check, integer, jsonb, uniqueIndex, numeric, primaryKey } from "drizzle-orm/pg-core"
+import { pgTable, unique, uuid, text, boolean, timestamp, index, check, integer, jsonb, uniqueIndex, numeric, primaryKey, bigint } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 
@@ -583,4 +583,36 @@ export const launch_truth_sheets = pgTable("launch_truth_sheets", {
 	approved_by: uuid(),
 	approved_at: timestamp({ withTimezone: true, mode: 'string' }),
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+});
+
+export const launch_capture_plans = pgTable("launch_capture_plans", {
+	launch_id: uuid().primaryKey().notNull(),
+	organization_id: uuid().notNull(),
+	capture_choice: text(),
+	rehearsal_checked: text().array().default(sql`'{}'`).notNull(),
+	confidential_sections: text(),
+	updated_by: uuid(),
+	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+});
+
+export const launch_recordings = pgTable("launch_recordings", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	organization_id: uuid().notNull(),
+	launch_id: uuid().notNull(),
+	source: text().notNull(),
+	status: text().default('awaiting_upload').notNull(),
+	storage_path: text(),
+	pending_path: text(),
+	original_filename: text(),
+	content_type: text(),
+	size_bytes: bigint({ mode: 'number' }),
+	duration_ms: integer(),
+	transcript: jsonb(),
+	transcript_source: text(),
+	failure_code: text(),
+	failure_message: text(),
+	attempts: integer().default(0).notNull(),
+	created_by: uuid(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updated_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 });
