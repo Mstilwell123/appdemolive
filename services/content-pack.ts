@@ -195,7 +195,11 @@ export async function completeExportUpload(launchId: string, versionId: string) 
   operatorOnly(actorKind, "Our team uploads exports");
   const v = await versionById(db, launchId, versionId);
   if (v.export_status !== "rendering" || !v.export_path) throw new AppError("INVALID_STATE_TRANSITION", "Start the export upload again.");
-  const ok = !!(await getStorage()?.exists(v.export_path));
+  const storage = getStorage();
+  const found = storage ? await storage.exists(v.export_path) : null;
+  const typeOk = !found?.contentType || /^video\/(mp4|quicktime|webm)$/.test(found.contentType);
+  if (found && (!typeOk || found.size > 2 * 1024 * 1024 * 1024)) await storage?.remove(v.export_path);
+  const ok = !!found && typeOk && found.size <= 2 * 1024 * 1024 * 1024;
   await db.update(launch_clip_versions)
     .set(ok ? { export_status: "ready", export_error: null } : { export_status: "failed", export_path: null, export_error: "The export upload didn't arrive." })
     .where(and(eq(launch_clip_versions.id, v.id), eq(launch_clip_versions.export_status, "rendering")));

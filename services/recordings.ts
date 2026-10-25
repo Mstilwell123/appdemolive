@@ -112,6 +112,13 @@ export async function completeUpload(launchId: string, recordingId: string) {
     await move(db, recordingId, "uploading", "failed", { failure_code: "upload_missing", failure_message: "The upload didn't arrive." });
     throw new AppError("PROCESSING_FAILED", "We couldn't find the uploaded file. Please upload it again.");
   }
+  // Server-side re-check of what actually landed: size within the declared size and the 2 GB cap, same allowed type.
+  const typeOk = !found.contentType || (found.contentType === rec.content_type && validateUpload({ name: "x", type: found.contentType, size: found.size }) === null);
+  if (!typeOk || found.size > MAX_UPLOAD_BYTES || (rec.size_bytes != null && found.size > Number(rec.size_bytes))) {
+    await storage?.remove(rec.pending_path);
+    await move(db, recordingId, "uploading", "failed", { failure_code: "upload_rejected", failure_message: "The uploaded file didn't match the type or size we expected." });
+    throw new AppError("VALIDATION_FAILED", "That file didn't match the type or size you selected. Please upload it again.");
+  }
   await move(db, recordingId, "uploading", "uploaded", { storage_path: rec.pending_path, pending_path: null, size_bytes: found.size });
 }
 
