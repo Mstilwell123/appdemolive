@@ -136,3 +136,25 @@ describe("R6 plan items", () => {
     await expect(item(alice.orgId, other, versionId)).rejects.toThrow();
   });
 });
+
+describe("R7 tracked links", () => {
+  const link = (orgId: string, launchId: string, slug: string, url = "https://a.example/") =>
+    db.query<{ id: string }>("insert into public.tracked_links (organization_id, launch_id, slug, destination_url) values ($1,$2,$3,$4) returning id", [orgId, launchId, slug, url]);
+  it("slugs are unique and safe, destinations are http(s), clicks dedupe per visitor window", async () => {
+    const { launchId } = await seedAppAndLaunch(db, alice.orgId, alice.userId, "tl-db");
+    await expect(link(alice.orgId, launchId, "bad slug!")).rejects.toThrow();
+    await expect(link(alice.orgId, launchId, "goodslug1", "javascript:alert(1)")).rejects.toThrow();
+    const id = (await link(alice.orgId, launchId, "goodslug1")).rows[0].id;
+    await expect(link(alice.orgId, launchId, "goodslug1")).rejects.toThrow();
+    const click = () => db.query("insert into public.tracked_link_clicks (link_id, launch_id, visitor_hash, click_window) values ($1,$2,'0123456789abcdef0123',1)", [id, launchId]);
+    await click();
+    await expect(click()).rejects.toThrow();
+  });
+  it("rejects links and clicks tied to another org or launch", async () => {
+    const { launchId } = await seedAppAndLaunch(db, alice.orgId, alice.userId, "tl-x");
+    const { launchId: other } = await seedAppAndLaunch(db, alice.orgId, alice.userId, "tl-x2");
+    await expect(link(bob.orgId, launchId, "crossorg1")).rejects.toThrow();
+    const id = (await link(alice.orgId, launchId, "ownslug01")).rows[0].id;
+    await expect(db.query("insert into public.tracked_link_clicks (link_id, launch_id, visitor_hash, click_window) values ($1,$2,'0123456789abcdef0123',1)", [id, other])).rejects.toThrow();
+  });
+});

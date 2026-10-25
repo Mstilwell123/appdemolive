@@ -677,3 +677,24 @@ export const launch_plan_items = pgTable("launch_plan_items", {
 	confirmed_at: timestamp({ withTimezone: true, mode: 'string' }),
 	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 });
+
+export const tracked_links = pgTable("tracked_links", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	organization_id: uuid().notNull(),
+	launch_id: uuid().notNull(),
+	plan_item_id: uuid(),
+	slug: text().notNull(),
+	destination_url: text().notNull(),
+	channel: text(),
+	created_by: uuid(),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+});
+
+export const tracked_link_clicks = pgTable("tracked_link_clicks", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	link_id: uuid().notNull(),
+	launch_id: uuid().notNull(),
+	visitor_hash: text().notNull(),
+	click_window: bigint({ mode: 'number' }).notNull(),
+	clicked_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+});

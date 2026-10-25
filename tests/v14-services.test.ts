@@ -245,3 +245,45 @@ describe("R6 promotion plan service", () => {
     await pp.skipItem(launchId, second.id);
   });
 });
+
+describe("R7 tracked links", () => {
+  it("creates links per plan item, dedupes clicks, redirects even when tracking fails; other orgs see nothing", async () => {
+    const pp = await import("@/services/promotion-plan");
+    const tl = await import("@/services/tracked-links");
+    const { GET } = await import("@/app/r/[slug]/route");
+    const { NextRequest } = await import("next/server");
+    const { launchId, appId } = await seedAppAndLaunch(pg, alice.orgId, alice.userId, "svc-tl");
+    await pg.query("update public.apps set website_url = 'https://invoice.example.com/' where id = $1", [appId]);
+    await seedApprovedClip(pg, alice.orgId, launchId, alice.userId);
+    signIn(alice);
+    expect((await tl.getMeasure(launchId)).metrics.every((m) => m.status === "unavailable")).toBe(true);
+    await pp.generatePromotionPlan(launchId, { channels: [{ channel: "x", owner: "founder" }], startDate: "2026-11-02", timezone: "UTC" });
+    expect(await tl.createLinksForPlan(launchId)).toBe(8);
+    expect(await tl.createLinksForPlan(launchId)).toBe(0);
+    signIn(bob);
+    await expect(tl.getMeasure(launchId)).rejects.toMatchObject(NF);
+    await expect(tl.createLinksForPlan(launchId)).rejects.toMatchObject(NF);
+    signIn(alice);
+    const link = (await tl.getMeasure(launchId)).links[0];
+
+    const hit = (cookie?: string) => GET(new NextRequest(`http://localhost/r/${link.slug}`, { headers: cookie ? { cookie } : {} }), { params: Promise.resolve({ slug: link.slug }) });
+    const r1 = await hit();
+    expect(r1.status).toBe(302);
+    expect(r1.headers.get("location")).toContain("invoice.example.com");
+    const visitor = r1.headers.get("set-cookie")!.match(/ad_v=([^;]+)/)![1];
+    await hit(`ad_v=${visitor}`);
+    await hit();
+    const m = await tl.getMeasure(launchId);
+    expect(m.links.find((l) => l.slug === link.slug)!.clicks).toBe(2);
+    expect(m.metrics.find((x) => x.source === "clicks")).toMatchObject({ status: "connected", value: 2 });
+    expect(m.metrics.find((x) => x.source === "signups")).toMatchObject({ status: "unavailable", value: null });
+
+    // Tracking failure (clicks table gone) still redirects.
+    await pg.exec("alter table public.tracked_link_clicks rename to tracked_link_clicks_off");
+    try {
+      const r = await hit();
+      expect(r.status).toBe(302);
+    } finally { await pg.exec("alter table public.tracked_link_clicks_off rename to tracked_link_clicks"); }
+    expect((await GET(new NextRequest("http://localhost/r/nope-nope-nope"), { params: Promise.resolve({ slug: "nope-nope-nope" }) })).status).toBe(404);
+  });
+});
