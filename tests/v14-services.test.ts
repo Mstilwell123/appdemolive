@@ -6,7 +6,7 @@ import { drizzle } from "drizzle-orm/pglite";
 import * as schema from "@/db/schema";
 import { setDbForTests, type Db } from "@/lib/db";
 import type { SessionUser } from "@/lib/session-user";
-import { bootDb, createUser, seedAppAndLaunch } from "./db";
+import { bootDb, createUser, seedAppAndLaunch, seedApprovedClip } from "./db";
 
 vi.mock("server-only", () => ({}));
 let current: SessionUser | null = null;
@@ -199,5 +199,49 @@ describe("R5 content pack service", () => {
     await expect(cp.reviewClip(launchId, c.current.id, "approved", "")).rejects.toMatchObject({ code: "INVALID_STATE_TRANSITION" });
 
     storage.setStorageForTests(undefined);
+  });
+});
+
+describe("R6 promotion plan service", () => {
+  it("builds from approved clips, records self-reported posts, team confirms; other orgs see nothing", async () => {
+    const pp = await import("@/services/promotion-plan");
+    const cp = await import("@/services/content-pack");
+    const { launchId } = await seedAppAndLaunch(pg, alice.orgId, alice.userId, "svc-pp");
+    const setup = { channels: [{ channel: "linkedin" as const, owner: "founder" as const }], startDate: "2026-11-02", timezone: "America/Los_Angeles" };
+    signIn(alice);
+    await expect(pp.generatePromotionPlan(launchId, setup)).rejects.toMatchObject({ code: "APPROVAL_REQUIRED" });
+    const { clipId } = await seedApprovedClip(pg, alice.orgId, launchId, alice.userId);
+    await expect(pp.generatePromotionPlan(launchId, { ...setup, timezone: "Mars/Base" })).rejects.toThrow();
+    expect(await pp.generatePromotionPlan(launchId, setup)).toBe(8);
+    expect(await pp.generatePromotionPlan(launchId, setup)).toBe(8);
+
+    signIn(bob);
+    await expect(pp.getPlan(launchId)).rejects.toMatchObject(NF);
+    signIn(alice);
+    const [first, second] = (await pp.getPlan(launchId)).items;
+    expect(first.status).toBe("planned");
+    signIn(bob);
+    await expect(pp.recordPost(launchId, first.id, "https://linkedin.com/p/1", ["approved", "downloaded", "copy", "account"])).rejects.toMatchObject(NF);
+
+    signIn(alice);
+    const all = ["approved", "downloaded", "copy", "account"];
+    await expect(pp.recordPost(launchId, first.id, "https://linkedin.com/p/1", ["approved"])).rejects.toMatchObject({ code: "VALIDATION_FAILED" });
+    await expect(pp.recordPost(launchId, first.id, "ftp://x", all)).rejects.toMatchObject({ code: "VALIDATION_FAILED" });
+    await pp.recordPost(launchId, first.id, "https://linkedin.com/p/1", all);
+    await expect(pp.recordPost(launchId, first.id, "https://linkedin.com/p/2", all)).rejects.toMatchObject({ code: "INVALID_STATE_TRANSITION" });
+    await expect(pp.recordPost(launchId, second.id, "https://linkedin.com/p/1", all)).rejects.toMatchObject({ code: "VALIDATION_FAILED" });
+    await expect(pp.confirmPost(launchId, first.id)).rejects.toMatchObject({ code: "FORBIDDEN" });
+    await expect(pp.generatePromotionPlan(launchId, setup)).rejects.toMatchObject({ code: "INVALID_STATE_TRANSITION" });
+    signIn(staff);
+    await pp.confirmPost(launchId, first.id);
+
+    // Editing the clip puts unrecorded items on hold until the new version is approved.
+    signIn(alice);
+    const cur = (await cp.getContentPack(launchId)).clips.find((c) => c.id === clipId)!;
+    await cp.editClip(launchId, clipId, { ...cur.current.content, caption: "Changed" });
+    const after = (await pp.getPlan(launchId)).items.find((i) => i.id === second.id)!;
+    expect(after.blocker).toMatch(/on hold/);
+    await expect(pp.recordPost(launchId, second.id, "https://linkedin.com/p/3", all)).rejects.toMatchObject({ code: "INVALID_STATE_TRANSITION" });
+    await pp.skipItem(launchId, second.id);
   });
 });

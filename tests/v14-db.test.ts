@@ -3,7 +3,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import type { PGlite } from "@electric-sql/pglite";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { bootDb, createUser, seedAppAndLaunch } from "./db";
+import { bootDb, createUser, seedAppAndLaunch, seedApprovedClip } from "./db";
 
 let db: PGlite;
 let alice: { userId: string; orgId: string };
@@ -113,5 +113,26 @@ describe("R5 content pack", () => {
     const v = (await ver(c, launchId, alice.orgId)).rows[0].id;
     await expect(review(v, other, alice.orgId, "approved", null)).rejects.toThrow();
     await expect(review(v, launchId, bob.orgId, "approved", null)).rejects.toThrow();
+  });
+});
+
+describe("R6 plan items", () => {
+  const item = (orgId: string, launchId: string, versionId: string, status = "planned", posted: string | null = null, by: string | null = null) =>
+    db.query("insert into public.launch_plan_items (organization_id, launch_id, clip_version_id, day, planned_date, planned_time, timezone, channel, channel_owner, responsible, audience, objective, post_copy, status, posted_url, posted_at, reported_by) values ($1,$2,$3,1,'2026-11-01','09:00','UTC','x','founder','founder','a','o','c',$4,$5,case when $5::text is null then null else now() end,$6)",
+      [orgId, launchId, versionId, status, posted, by]);
+  it("a recorded post needs a link and reporter; confirmed needs a confirmer; links are unique per launch", async () => {
+    const { launchId } = await seedAppAndLaunch(db, alice.orgId, alice.userId, "pp-db");
+    const { versionId } = await seedApprovedClip(db, alice.orgId, launchId, alice.userId);
+    await expect(item(alice.orgId, launchId, versionId, "posted_self_reported")).rejects.toThrow();
+    await expect(item(alice.orgId, launchId, versionId, "confirmed", "https://a.b/1", alice.userId)).rejects.toThrow();
+    await item(alice.orgId, launchId, versionId, "posted_self_reported", "https://a.b/1", alice.userId);
+    await expect(item(alice.orgId, launchId, versionId, "posted_self_reported", "https://a.b/1", alice.userId)).rejects.toThrow();
+  });
+  it("rejects items tied to another org or another launch's clip", async () => {
+    const { launchId } = await seedAppAndLaunch(db, alice.orgId, alice.userId, "pp-x");
+    const { launchId: other } = await seedAppAndLaunch(db, alice.orgId, alice.userId, "pp-x2");
+    const { versionId } = await seedApprovedClip(db, alice.orgId, launchId, alice.userId);
+    await expect(item(bob.orgId, launchId, versionId)).rejects.toThrow();
+    await expect(item(alice.orgId, other, versionId)).rejects.toThrow();
   });
 });
