@@ -568,3 +568,19 @@ export const launch_status_transitions = pgTable("launch_status_transitions", {
 	primaryKey({ columns: [table.from_status, table.to_status], name: "launch_status_transitions_pkey"}),
 	check("launch_status_transitions_allowed_actors_check", sql`allowed_actors <@ ARRAY['founder'::text, 'operator'::text, 'system'::text]`),
 ]);
+
+// ---- PRD v1.4 additions (db/migrations/0002+). Hand-written to match the SQL. ----
+
+export const launch_truth_sheets = pgTable("launch_truth_sheets", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	organization_id: uuid().notNull(),
+	launch_id: uuid().notNull(),
+	version: integer().notNull(),
+	status: text().default('draft').notNull(),
+	items: jsonb().default([]).notNull(),
+	source: text().default('founder').notNull(),
+	created_by: uuid(),
+	approved_by: uuid(),
+	approved_at: timestamp({ withTimezone: true, mode: 'string' }),
+	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+});
